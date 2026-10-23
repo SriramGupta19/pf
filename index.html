@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sri Ram Gupta — The Atlas</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Caveat:wght@500;600&family=Cormorant:wght@400;500;600&display=swap');
+
+  :root{
+    --paper:#f3ead9;
+    --paper-dark:#e8dcc4;
+    --ink:#2e2820;
+    --ink-soft:#5c5343;
+    --rust:#b5542a;
+    --teal:#3f6b64;
+    --gold:#9c7a2f;
+    --border:#c9b995;
+    --serif:'Playfair Display', serif;
+    --hand:'Caveat', cursive;
+    --body:'Cormorant', serif;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:var(--paper); color:var(--ink); font-family:var(--body); font-size:1.05rem;
+    overflow-x:hidden;
+  }
+  ::selection{ background:var(--rust); color:#fff; }
+
+  /* Paper texture */
+  .paper-texture{
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.6;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(156,122,47,0.05), transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(181,84,42,0.04), transparent 50%);
+  }
+  .paper-texture::after{
+    content:''; position:absolute; inset:0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  }
+
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:200;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:20px 5%; background:rgba(243,234,217,0.92); backdrop-filter:blur(4px);
+    border-bottom:1px solid var(--border);
+  }
+  .logo{ font-family:var(--serif); font-size:1.1rem; font-weight:700; letter-spacing:0.5px; }
+  .logo span{ color:var(--rust); }
+  nav ul{ list-style:none; display:flex; gap:24px; }
+  nav a{ color:var(--ink-soft); text-decoration:none; font-size:0.8rem; letter-spacing:0.5px; text-transform:uppercase; transition:color .25s; font-family:var(--body); }
+  nav a:hover{ color:var(--rust); }
+
+  main{ position:relative; z-index:1; max-width:1000px; margin:0 auto; padding:0 5%; }
+
+  /* HERO as compass + map intro */
+  #hero{ min-height:94vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding-top:60px; }
+  .compass{ width:90px; height:90px; margin-bottom:22px; animation:rotate 40s linear infinite; }
+  @keyframes rotate{ from{ transform:rotate(0deg); } to{ transform:rotate(360deg); } }
+  .compass svg{ width:100%; height:100%; }
+  .eyebrow{ font-family:var(--hand); font-size:1.3rem; color:var(--rust); margin-bottom:10px; }
+  h1.hero-title{ font-family:var(--serif); font-size:clamp(2.2rem,6vw,3.6rem); font-weight:700; line-height:1.15; margin-bottom:20px; }
+  h1.hero-title em{ font-style:italic; color:var(--rust); font-weight:500; }
+  .hero-sub{ color:var(--ink-soft); font-size:1.08rem; line-height:1.8; max-width:540px; margin-bottom:32px; }
+  .btn-row{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+  .btn{
+    font-family:var(--body); font-size:0.9rem; padding:12px 28px; border:1.5px solid var(--ink); border-radius:2px;
+    color:var(--ink); text-decoration:none; transition:all .3s; background:transparent;
+  }
+  .btn:hover{ background:var(--ink); color:var(--paper); }
+  .btn.rust{ border-color:var(--rust); color:var(--rust); }
+  .btn.rust:hover{ background:var(--rust); color:var(--paper); }
+
+  /* Section headers like map legend titles */
+  .sec-head{ margin:90px 0 40px; text-align:center; }
+  .sec-head .label{ font-family:var(--hand); color:var(--rust); font-size:1.2rem; }
+  .sec-head h2{ font-family:var(--serif); font-size:1.8rem; font-weight:600; margin-top:4px; }
+  .sec-divider{ width:60px; height:2px; background:var(--gold); margin:16px auto 0; }
+
+  /* JOURNEY MAP — route with pins */
+  .journey{ position:relative; padding:20px 0 40px; }
+  .route-line{
+    position:absolute; left:28px; top:0; bottom:0; width:2px;
+    background:repeating-linear-gradient(to bottom, var(--gold) 0 8px, transparent 8px 16px);
+  }
+  .journey-stop{ position:relative; padding-left:70px; margin-bottom:42px; cursor:pointer; }
+  .pin{
+    position:absolute; left:14px; top:2px; width:30px; height:30px; border-radius:50%;
+    background:var(--paper); border:2px solid var(--rust); display:flex; align-items:center; justify-content:center;
+    font-size:0.9rem; transition:transform .25s, box-shadow .25s; z-index:2;
+  }
+  .journey-stop:hover .pin{ transform:scale(1.15); box-shadow:0 0 0 6px rgba(181,84,42,0.12); }
+  .stop-date{ font-family:var(--hand); color:var(--rust); font-size:1.1rem; }
+  .stop-title{ font-family:var(--serif); font-weight:600; font-size:1.15rem; margin-top:2px; }
+  .stop-org{ color:var(--ink-soft); font-size:0.92rem; margin-top:2px; }
+  .stop-detail{
+    max-height:0; opacity:0; overflow:hidden; transition:all .4s; margin-top:0;
+    color:var(--ink-soft); font-size:0.92rem; line-height:1.7; border-left:2px solid var(--gold); padding-left:14px;
+  }
+  .journey-stop.open .stop-detail{ max-height:150px; opacity:1; margin-top:12px; }
+  .stop-arrow{ font-family:var(--hand); color:var(--gold); font-size:1rem; margin-left:8px; }
+
+  /* SKILLS as "tools in the satchel" */
+  .satchel-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px; }
+  .satchel-card{
+    background:var(--paper-dark); border:1px solid var(--border); border-radius:4px; padding:22px;
+    position:relative;
+  }
+  .satchel-card::before{ content:'✦'; position:absolute; top:12px; right:14px; color:var(--gold); font-size:0.8rem; opacity:0.5; }
+  .satchel-card h4{ font-family:var(--serif); font-size:1rem; color:var(--rust); margin-bottom:12px; font-weight:600; }
+  .chip-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{ font-size:0.85rem; padding:5px 13px; border:1px solid var(--border); border-radius:14px; color:var(--ink); background:var(--paper); transition:.2s; }
+  .chip:hover{ border-color:var(--rust); color:var(--rust); }
+
+  /* PROJECTS as "field notes" entries */
+  .note-entry{ border-bottom:1px dashed var(--border); padding:20px 0; cursor:pointer; }
+  .note-top{ display:flex; justify-content:space-between; align-items:baseline; gap:14px; }
+  .note-title{ font-family:var(--serif); font-weight:600; font-size:1.1rem; }
+  .note-date{ font-family:var(--hand); color:var(--rust); font-size:1rem; white-space:nowrap; }
+  .note-desc{ color:var(--ink-soft); font-size:0.92rem; line-height:1.7; max-height:0; opacity:0; overflow:hidden; transition:all .4s; }
+  .note-entry.open .note-desc{ max-height:150px; opacity:1; margin-top:10px; }
+
+  /* ACHIEVEMENTS as "stamps in a passport" */
+  .filter-row{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:28px; }
+  .filter-btn{ font-family:var(--body); font-size:0.82rem; padding:7px 16px; border-radius:16px; border:1px solid var(--border); background:transparent; color:var(--ink-soft); cursor:pointer; transition:.2s; }
+  .filter-btn.active, .filter-btn:hover{ background:var(--rust); color:#fff; border-color:var(--rust); }
+  .stamp-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; }
+  .stamp{
+    border:2px dashed var(--border); border-radius:6px; padding:18px; text-align:center;
+    transform:rotate(calc(var(--r, 0) * 1deg)); transition:transform .3s;
+  }
+  .stamp:hover{ transform:rotate(0deg) scale(1.03); border-color:var(--rust); }
+  .stamp-tag{ font-family:var(--hand); color:var(--teal); font-size:0.95rem; }
+  .stamp-title{ font-weight:600; font-size:0.88rem; margin:6px 0 4px; }
+  .stamp-org{ color:var(--ink-soft); font-size:0.78rem; }
+
+  /* ACTIVITIES as "postcards sent" list */
+  .search-input{
+    width:100%; max-width:340px; display:block; margin:0 auto 20px; padding:10px 16px;
+    background:var(--paper); border:1px solid var(--border); border-radius:20px; color:var(--ink);
+    font-family:var(--body); font-size:0.92rem;
+  }
+  .search-input:focus{ outline:none; border-color:var(--rust); }
+  .postcard-row{
+    display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; align-items:center;
+    padding:12px 18px; border:1px solid var(--border); border-radius:4px; margin-bottom:7px; background:var(--paper-dark);
+  }
+  .pc-role{ font-weight:600; font-size:0.9rem; }
+  .pc-org{ color:var(--ink-soft); font-size:0.8rem; }
+  .pc-date{ font-family:var(--hand); color:var(--rust); font-size:0.92rem; }
+  .entry-count{ text-align:center; color:var(--ink-soft); font-size:0.85rem; margin-bottom:14px; font-family:var(--hand); }
+
+  /* CERTS as "souvenirs collected" */
+  .souvenir-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; }
+  .souvenir{ background:var(--paper-dark); border:1px solid var(--border); border-radius:4px; padding:16px 18px; }
+  .souvenir-issuer{ font-family:var(--hand); color:var(--teal); font-size:0.95rem; }
+  .souvenir-title{ font-weight:600; font-size:0.88rem; margin:6px 0 3px; }
+  .souvenir-date{ color:var(--ink-soft); font-size:0.78rem; }
+
+  /* CONTACT as "send a letter" */
+  #contact{ text-align:center; padding:100px 0; }
+  .envelope{
+    display:inline-block; border:1.5px solid var(--ink); border-radius:4px; padding:40px 48px;
+    background:var(--paper-dark); position:relative;
+  }
+  .envelope::before{ content:'✉'; font-size:1.8rem; color:var(--rust); display:block; margin-bottom:14px; }
+  .big-email{ font-family:var(--serif); font-size:clamp(1.2rem,4vw,1.8rem); color:var(--ink); text-decoration:none; font-weight:600; }
+  .big-email:hover{ color:var(--rust); }
+  .contact-links{ display:flex; justify-content:center; gap:22px; margin-top:22px; flex-wrap:wrap; }
+  .contact-links a{ color:var(--ink-soft); text-decoration:none; font-size:0.88rem; }
+  .contact-links a:hover{ color:var(--rust); }
+
+  footer{ text-align:center; padding:30px; color:var(--ink-soft); font-size:0.82rem; border-top:1px solid var(--border); font-family:var(--hand); font-size:1.1rem; }
+
+  @media(max-width:768px){
+    nav ul{ display:none; }
+    .route-line{ left:20px; }
+    .journey-stop{ padding-left:56px; }
+    .pin{ left:6px; width:26px; height:26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="paper-texture"></div>
+
+<nav>
+  <div class="logo">S.R. <span>Gupta</span></div>
+  <ul>
+    <li><a href="#journey">Journey</a></li>
+    <li><a href="#skills">Satchel</a></li>
+    <li><a href="#projects">Field Notes</a></li>
+    <li><a href="#achievements">Stamps</a></li>
+    <li><a href="#activities">Postcards</a></li>
+    <li><a href="#contact">Write</a></li>
+  </ul>
+</nav>
+
+<main>
+  <section id="hero">
+    <div class="compass">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="#2e2820" stroke-width="1.5"/>
+        <circle cx="50" cy="50" r="2.5" fill="#b5542a"/>
+        <path d="M50,10 L56,50 L50,90 L44,50 Z" fill="#b5542a" opacity="0.85"/>
+        <path d="M10,50 L50,44 L90,50 L50,56 Z" fill="#2e2820" opacity="0.6"/>
+        <text x="50" y="22" text-anchor="middle" font-size="8" fill="#2e2820" font-family="serif">N</text>
+      </svg>
+    </div>
+    <div class="eyebrow">an engineer's atlas</div>
+    <h1 class="hero-title">Maddula Sri Ram <em>Gupta</em></h1>
+    <p class="hero-sub">
+      A map of places I've studied, built things, and left a little mark — from Hyderabad to Coimbatore to Kozhikode, now charting a course at GE Vernova.
+    </p>
+    <div class="btn-row">
+      <a href="#journey" class="btn rust">Trace My Journey</a>
+      <a href="#contact" class="btn">Send a Letter</a>
+    </div>
+  </section>
+
+  <section id="journey">
+    <div class="sec-head"><div class="label">chapter one</div><h2>The Journey</h2><div class="sec-divider"></div></div>
+    <div class="journey">
+      <div class="route-line"></div>
+      <div id="journeyList"></div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="sec-head"><div class="label">chapter two</div><h2>Tools in the Satchel</h2><div class="sec-divider"></div></div>
+    <div class="satchel-grid">
+      <div class="satchel-card"><h4>Languages</h4><div class="chip-row"><div class="chip">C</div><div class="chip">C#</div><div class="chip">Python</div><div class="chip">German</div></div></div>
+      <div class="satchel-card"><h4>Tools & Frameworks</h4><div class="chip-row"><div class="chip">MATLAB</div><div class="chip">LabVIEW</div><div class="chip">ROS2</div><div class="chip">Gazebo</div></div></div>
+      <div class="satchel-card"><h4>Platforms</h4><div class="chip-row"><div class="chip">Arduino</div><div class="chip">Raspberry Pi</div><div class="chip">ESP32</div><div class="chip">Ubuntu</div></div></div>
+      <div class="satchel-card"><h4>Fellowships</h4><div class="chip-row"><div class="chip">NVIDIA Developer</div><div class="chip">Arm Developer</div></div></div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="sec-head"><div class="label">chapter three</div><h2>Field Notes</h2><div class="sec-divider"></div></div>
+    <div id="noteList"></div>
+  </section>
+
+  <section id="achievements">
+    <div class="sec-head"><div class="label">chapter four</div><h2>Stamps in the Passport</h2><div class="sec-divider"></div></div>
+    <div class="filter-row" id="achFilters"></div>
+    <div class="stamp-grid" id="stampGrid"></div>
+  </section>
+
+  <section id="activities">
+    <div class="sec-head"><div class="label">chapter five</div><h2>Postcards Sent Along the Way</h2><div class="sec-divider"></div></div>
+    <input type="text" class="search-input" id="pcSearch" placeholder="Search roles, places..." />
+    <div class="filter-row" id="pcFilters"></div>
+    <div class="entry-count" id="pcCount"></div>
+    <div id="pcList"></div>
+  </section>
+
+  <section id="certs">
+    <div class="sec-head"><div class="label">chapter six</div><h2>Souvenirs Collected</h2><div class="sec-divider"></div></div>
+    <div class="souvenir-grid" id="souvenirGrid"></div>
+  </section>
+
+  <section id="contact">
+    <div class="sec-head"><div class="label">final chapter</div><h2>Write to Me</h2><div class="sec-divider"></div></div>
+    <div class="envelope">
+      <a href="mailto:sriramgupta21@gmail.com" class="big-email">sriramgupta21@gmail.com</a>
+      <div class="contact-links">
+        <a href="tel:+917287878705">+91 72878 78705</a>
+        <a href="https://linkedin.com/in/sriram-gupta-m" target="_blank">LinkedIn ↗</a>
+        <a href="https://github.com/" target="_blank">GitHub ↗</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>— the map is never quite finished — © <span id="year"></span></footer>
+
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* JOURNEY */
+const journey = [
+  { date:"2026 — onward", icon:"⚙", title:"Edison Engineer, Gas Power Engineering", org:"GE Vernova, HTC, India", desc:"Rotation one: Controls Platform Software Development." },
+  { date:"2024 — 2026", icon:"🎓", title:"M.Tech, Industrial Power & Automation", org:"NIT Calicut · CGPA 9.88/10, Gold Medalist", desc:"Research on adaptive multi-robot coordination and control." },
+  { date:"2020 — 2024", icon:"🎓", title:"B.Tech, Electrical & Electronics Engineering", org:"Amrita School of Engineering, Coimbatore · CGPA 9.47/10, Gold Medalist", desc:"Best Outgoing Student. Built a SCADA system and led the Gen-E association." },
+  { date:"2018 — 2020", icon:"📘", title:"Higher Secondary Certificate", org:"FIITJEE Junior College, Hyderabad · 91.4%", desc:"Where the path toward engineering first took shape." },
+  { date:"— 2018", icon:"🏡", title:"Secondary School Certificate", org:"St. Joseph's School, Hyderabad · 87%", desc:"Home base — where every journey begins." },
+];
+const journeyList = document.getElementById('journeyList');
+journey.forEach(j=>{
+  const el=document.createElement('div');
+  el.className='journey-stop';
+  el.innerHTML=`
+    <div class="pin">${j.icon}</div>
+    <div class="stop-date">${j.date}</div>
+    <div class="stop-title">${j.title}<span class="stop-arrow">✎</span></div>
+    <div class="stop-org">${j.org}</div>
+    <div class="stop-detail">${j.desc}</div>
+  `;
+  el.addEventListener('click', ()=> el.classList.toggle('open'));
+  journeyList.appendChild(el);
+});
+
+/* PROJECTS as field notes */
+const notes = [
+  { title:"Adaptive Multi-Robot Coordination & Control", date:"'25–'26", desc:"M.Tech thesis — leader-follower coordination for heterogeneous robots under uncertainty." },
+  { title:"AI Safety Interlock for Two-Wheelers", date:"'26", desc:"Qualcomm & Arduino challenge entry — CV helmet detection that blocks ignition." },
+  { title:"SCADA for a Smart Microgrid", date:"'23–'24", desc:"B.Tech thesis — real-time monitoring & predictive management for a microgrid testbed." },
+  { title:"Smart Residential Energy Management", date:"'24", desc:"App-controlled load shedding with backup time estimation." },
+  { title:"Energy Audit — Footwear Manufacturer", date:"'24", desc:"Audited a 9,200 pairs/day facility for efficiency gains." },
+  { title:"Overload Protection for Induction Motors", date:"'23", desc:"NodeMCU + cloud app monitoring motor faults in real time." },
+  { title:"Smart Irrigation System", date:"'23", desc:"IoT-based irrigation to reduce water wastage, built on ESP8266." },
+  { title:"Color Sense Bot", date:"'23", desc:"3-wheel robot that follows color-coded instructions via a sensor." },
+  { title:"Infrastructure Study, Dalapur (UP)", date:"'23", desc:"Rural development initiative using Participatory Rural Appraisal tools." },
+];
+const noteList = document.getElementById('noteList');
+notes.forEach(n=>{
+  const el=document.createElement('div');
+  el.className='note-entry';
+  el.innerHTML=`<div class="note-top"><div class="note-title">${n.title}</div><div class="note-date">${n.date}</div></div><div class="note-desc">${n.desc}</div>`;
+  el.addEventListener('click', ()=> el.classList.toggle('open'));
+  noteList.appendChild(el);
+});
+
+/* ACHIEVEMENTS as stamps */
+const achievements = [
+  { title:"Gold Medalist, M.Tech IPA", org:"NIT Calicut", cat:"Academic" },
+  { title:"Finalist, AI for All — Physical AI Edition", org:"Qualcomm & Arduino, New Delhi", cat:"Innovation" },
+  { title:"Winner, Poster & Slogan on Gender-Based Violence", org:"CWSE, NIT Calicut", cat:"Design" },
+  { title:"Winner, Breast Cancer Awareness Poster Contest", org:"NIT Calicut", cat:"Design" },
+  { title:"Winner, IEEE Problem Pulse 2025", org:"IEEE SB NITC & SIGHT", cat:"Hackathon" },
+  { title:"Winner, IEEE Kerala GSAC Logo Contest", org:"IEEE Kerala Section", cat:"Design" },
+  { title:"Runner Up, Hidden Green Photography", org:"IEEE SB MITS", cat:"Design" },
+  { title:"Winner, Idea Hackathon 2025", org:"NIT Calicut", cat:"Hackathon" },
+  { title:"Winner, IWD Poster Presentation", org:"ASEM South Asia", cat:"Design" },
+  { title:"Gold Medalist, B.Tech EEE", org:"Amrita Vishwa Vidyapeetham", cat:"Academic" },
+  { title:"Best Outgoing Student", org:"Amrita Vishwa Vidyapeetham", cat:"Academic" },
+  { title:"Academic Excellence Award", org:"Dept. of EEE, AVV", cat:"Academic" },
+  { title:"2nd Prize, Poster Design, Amritotsavam", org:"AVV", cat:"Design" },
+  { title:"Best Outgoing Student, Sports Day", org:"St. Joseph's School", cat:"Academic" },
+];
+const achCats = ["All", ...new Set(achievements.map(a=>a.cat))];
+const stampGrid = document.getElementById('stampGrid');
+const achFilters = document.getElementById('achFilters');
+function renderStamps(filter){
+  stampGrid.innerHTML='';
+  achievements.filter(a=>filter==='All'||a.cat===filter).forEach(a=>{
+    const el=document.createElement('div');
+    el.className='stamp';
+    el.style.setProperty('--r', (Math.random()*6-3).toFixed(1));
+    el.innerHTML=`<div class="stamp-tag">${a.cat}</div><div class="stamp-title">${a.title}</div><div class="stamp-org">${a.org}</div>`;
+    stampGrid.appendChild(el);
+  });
+}
+achCats.forEach(c=>{
+  const b=document.createElement('button');
+  b.className='filter-btn'+(c==='All'?' active':'');
+  b.textContent=c;
+  b.onclick=()=>{ document.querySelectorAll('#achFilters .filter-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderStamps(c); };
+  achFilters.appendChild(b);
+});
+renderStamps('All');
+
+/* ACTIVITIES as postcards */
+const postcards = [
+  { role:"Volunteer", org:"U&I Trust", date:"'26–now", cat:"Current" },
+  { role:"Volunteer", org:"Listeners Army", date:"'26–now", cat:"Current" },
+  { role:"NVIDIA Developer Program Member", org:"NVIDIA", date:"'24–now", cat:"Current" },
+  { role:"Arm Developer Program Member", org:"Arm", date:"'24–now", cat:"Current" },
+  { role:"Class Representative, M.Tech IPA", org:"NIT Calicut", date:"'24–'26", cat:"NIT Calicut" },
+  { role:"Branch Representative, M.Tech EE", org:"NIT Calicut", date:"'24–'26", cat:"NIT Calicut" },
+  { role:"Innovation Ambassador", org:"NIT Calicut Innovation Council", date:"'25–'26", cat:"NIT Calicut" },
+  { role:"Student Volunteer, Guidance Cell", org:"NIT Calicut", date:"'25–'26", cat:"NIT Calicut" },
+  { role:"NEP Saarthi", org:"NIT Calicut", date:"'24–'26", cat:"NIT Calicut" },
+  { role:"Student Council Member", org:"NIT Calicut Innovation Council", date:"'25–'26", cat:"NIT Calicut" },
+  { role:"Student Team Member, Clean Energy Centre", org:"NIT Calicut", date:"'25–'26", cat:"NIT Calicut" },
+  { role:"Designer, IEEE Virtual Speakers Bureau", org:"IEEE SAC", date:"'25–'26", cat:"IEEE" },
+  { role:"Student Team Member, CWSE", org:"NIT Calicut", date:"'25–'26", cat:"NIT Calicut" },
+  { role:"Executive Committee Member, Unnati", org:"CWSE, NIT Calicut", date:"'25–'26", cat:"NIT Calicut" },
+  { role:"Web-Master", org:"IEEE PES SBC, NIT Calicut", date:"'25–'26", cat:"IEEE" },
+  { role:"Treasurer", org:"IEEE PES SBC, NIT Calicut", date:"'25–'26", cat:"IEEE" },
+  { role:"Secretary, GSAC", org:"IEEE PES Kerala Chapter", date:"'25–'26", cat:"IEEE" },
+  { role:"Vice Chair, GSAC", org:"IEEE RAS Kerala Chapter", date:"'25–'26", cat:"IEEE" },
+  { role:"Designer", org:"IEEE Kerala Chapter GSAC", date:"'25–'26", cat:"IEEE" },
+  { role:"Ambassador", org:"IEEE PES Malabar Hub", date:"'25–'26", cat:"IEEE" },
+  { role:"Student Coordinator, Tinkherhack 4.0", org:"CWSE & NIT Calicut", date:"'26", cat:"NIT Calicut" },
+  { role:"Student Coordinator, PERC 2026", org:"NIT Calicut", date:"'25–'26", cat:"NIT Calicut" },
+  { role:"Student Volunteer, Alumni Day", org:"NIT Calicut", date:"'25", cat:"NIT Calicut" },
+  { role:"Student Volunteer, NPEC 2025", org:"NIT Calicut", date:"'25", cat:"NIT Calicut" },
+  { role:"Student Volunteer, ICRAR & WLP 2025", org:"CWSE, NIT Calicut", date:"'25", cat:"NIT Calicut" },
+  { role:"Student Volunteer, Wellness Seminar", org:"SGC, NIT Calicut", date:"'25", cat:"NIT Calicut" },
+  { role:"Organising Co-Lead, PES YP Conclave", org:"IEEE PES Kerala", date:"'25", cat:"IEEE" },
+  { role:"Mentor & Judge, Hack4Good", org:"IEEE SPS Kerala", date:"'24", cat:"IEEE" },
+  { role:"Central Coordinator, Cultural Activities", org:"Amrita Vishwa Vidyapeetham", date:"'23–'24", cat:"Amrita" },
+  { role:"President", org:"Gen-E, Dept. of EEE, Amrita", date:"'23–'24", cat:"Amrita" },
+  { role:"Secretary", org:"INCOSE Amrita Chapter", date:"'22–'24", cat:"Amrita" },
+  { role:"Advisor & Designer, WMD Team", org:"Anokha Techfest", date:"'23–'24", cat:"Amrita" },
+  { role:"Multimedia Designer", org:"Srishti Literary Club", date:"'22–'24", cat:"Amrita" },
+  { role:"Executive Lead", org:"Gen-E, Amrita", date:"'22–'23", cat:"Amrita" },
+  { role:"Graphic Designer", org:"Team Media, AVV", date:"'22–'24", cat:"Amrita" },
+  { role:"Designer, Elektron Magazine", org:"Gen-E, Amrita", date:"'21–'24", cat:"Amrita" },
+  { role:"Crew Member, Astra REEV", org:"Team Astra", date:"'22–'23", cat:"Amrita" },
+  { role:"Content Writer", org:"Brainly", date:"'21", cat:"Other" },
+  { role:"Class Representative, B.Tech EEE B", org:"AVV Coimbatore", date:"'20–'21", cat:"Amrita" },
+];
+const pcCats = ["All", ...new Set(postcards.map(p=>p.cat))];
+const pcFilters = document.getElementById('pcFilters');
+const pcList = document.getElementById('pcList');
+const pcCount = document.getElementById('pcCount');
+let activePcCat='All';
+function renderPostcards(){
+  const q = document.getElementById('pcSearch').value.toLowerCase();
+  const filtered = postcards.filter(p=>{
+    const matchCat = activePcCat==='All' || p.cat===activePcCat;
+    const matchSearch = (p.role+p.org).toLowerCase().includes(q);
+    return matchCat && matchSearch;
+  });
+  pcCount.textContent = `${filtered.length} of ${postcards.length} postcards`;
+  pcList.innerHTML='';
+  filtered.forEach(p=>{
+    const el=document.createElement('div');
+    el.className='postcard-row';
+    el.innerHTML=`<div><div class="pc-role">${p.role}</div><div class="pc-org">${p.org}</div></div><div class="pc-date">${p.date}</div>`;
+    pcList.appendChild(el);
+  });
+}
+pcCats.forEach(c=>{
+  const b=document.createElement('button');
+  b.className='filter-btn'+(c==='All'?' active':'');
+  b.textContent=c;
+  b.onclick=()=>{ document.querySelectorAll('#pcFilters .filter-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); activePcCat=c; renderPostcards(); };
+  pcFilters.appendChild(b);
+});
+document.getElementById('pcSearch').addEventListener('input', renderPostcards);
+renderPostcards();
+
+/* CERTS as souvenirs */
+const souvenirs = [
+  { title:"German Language, Level 3 (A+)", issuer:"Vivekananda Institute of Languages", date:"2025" },
+  { title:"Developing IoT Applications", issuer:"Cisco", date:"2024" },
+  { title:"Wireless Technologies for IoT", issuer:"Cisco", date:"2024" },
+  { title:"Blockchain and the Internet of Things", issuer:"Cisco", date:"2024" },
+  { title:"Grid Automation & Distribution Protection", issuer:"Tata Power-DDL", date:"2023" },
+  { title:"Electric Industry Operations and Markets", issuer:"Coursera", date:"2023" },
+  { title:"Energy Literacy Training", issuer:"Energy Swaraj Foundation", date:"2022" },
+  { title:"Intro to Augmented Reality & AR Core", issuer:"Coursera", date:"2021" },
+  { title:"Programming for Everyone (Python)", issuer:"Coursera", date:"2021" },
+  { title:"Graphic Design", issuer:"Coursera", date:"2021" },
+];
+const souvenirGrid = document.getElementById('souvenirGrid');
+souvenirs.forEach(s=>{
+  const el=document.createElement('div');
+  el.className='souvenir';
+  el.innerHTML=`<div class="souvenir-issuer">${s.issuer}</div><div class="souvenir-title">${s.title}</div><div class="souvenir-date">${s.date}</div>`;
+  souvenirGrid.appendChild(el);
+});
+</script>
+
+</body>
+</html>
