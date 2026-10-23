@@ -3,267 +3,309 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sri Ram Gupta — The Atlas</title>
+<title>Sri Ram Gupta — Mission Control</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Caveat:wght@500;600&family=Cormorant:wght@400;500;600&display=swap');
-
   :root{
-    --paper:#f3ead9;
-    --paper-dark:#e8dcc4;
-    --ink:#2e2820;
-    --ink-soft:#5c5343;
-    --rust:#b5542a;
-    --teal:#3f6b64;
-    --gold:#9c7a2f;
-    --border:#c9b995;
-    --serif:'Playfair Display', serif;
-    --hand:'Caveat', cursive;
-    --body:'Cormorant', serif;
+    --bg:#06080a;
+    --panel:#0d1014;
+    --panel2:#111519;
+    --grid-line:#161b20;
+    --amber:#ffb454;
+    --cyan:#64ffda;
+    --text:#d4d8dd;
+    --muted:#6b7280;
+    --danger:#ff6b6b;
+    --mono:'JetBrains Mono','Fira Code',monospace;
   }
-  *{ box-sizing:border-box; margin:0; padding:0; }
+  *{ margin:0; padding:0; box-sizing:border-box; }
   html{ scroll-behavior:smooth; }
   body{
-    background:var(--paper); color:var(--ink); font-family:var(--body); font-size:1.05rem;
-    overflow-x:hidden;
+    background:var(--bg); color:var(--text); font-family:var(--mono);
+    display:flex; min-height:100vh; overflow-x:hidden;
   }
-  ::selection{ background:var(--rust); color:#fff; }
+  ::selection{ background:var(--cyan); color:#000; }
 
-  /* Paper texture */
-  .paper-texture{
-    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.6;
+  /* HUD grid background */
+  .hud-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
     background-image:
-      radial-gradient(circle at 20% 30%, rgba(156,122,47,0.05), transparent 50%),
-      radial-gradient(circle at 80% 70%, rgba(181,84,42,0.04), transparent 50%);
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:40px 40px;
+    opacity:0.5;
   }
-  .paper-texture::after{
+  .hud-bg::after{
     content:''; position:absolute; inset:0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    background:radial-gradient(circle at 20% 10%, rgba(100,255,218,0.05), transparent 50%),
+               radial-gradient(circle at 80% 90%, rgba(255,180,84,0.05), transparent 50%);
+  }
+  .scanline{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, transparent 1px, transparent 2px);
   }
 
-  nav{
-    position:fixed; top:0; left:0; right:0; z-index:200;
-    display:flex; justify-content:space-between; align-items:center;
-    padding:20px 5%; background:rgba(243,234,217,0.92); backdrop-filter:blur(4px);
-    border-bottom:1px solid var(--border);
+  /* SIDEBAR */
+  .sidebar{
+    width:230px; flex-shrink:0; background:var(--panel);
+    border-right:1px solid var(--grid-line); position:fixed; top:0; left:0; bottom:0;
+    z-index:50; display:flex; flex-direction:column; padding:28px 0;
   }
-  .logo{ font-family:var(--serif); font-size:1.1rem; font-weight:700; letter-spacing:0.5px; }
-  .logo span{ color:var(--rust); }
-  nav ul{ list-style:none; display:flex; gap:24px; }
-  nav a{ color:var(--ink-soft); text-decoration:none; font-size:0.8rem; letter-spacing:0.5px; text-transform:uppercase; transition:color .25s; font-family:var(--body); }
-  nav a:hover{ color:var(--rust); }
+  .sb-logo{ padding:0 24px 24px; border-bottom:1px solid var(--grid-line); margin-bottom:20px; }
+  .sb-logo .name{ font-weight:700; font-size:1rem; color:var(--text); letter-spacing:-0.5px; }
+  .sb-logo .role{ font-size:0.68rem; color:var(--cyan); margin-top:6px; letter-spacing:0.5px; }
+  .sb-status{ display:flex; align-items:center; gap:8px; margin-top:12px; font-size:0.65rem; color:var(--muted); }
+  .sb-status .led{ width:7px; height:7px; border-radius:50%; background:var(--cyan); animation:blink 1.6s infinite; box-shadow:0 0 8px var(--cyan); }
+  @keyframes blink{ 50%{ opacity:0.3; } }
+  .sb-nav{ display:flex; flex-direction:column; gap:2px; padding:0 12px; }
+  .sb-nav a{
+    display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:6px;
+    color:var(--muted); text-decoration:none; font-size:0.78rem; transition:all .25s;
+    border-left:2px solid transparent;
+  }
+  .sb-nav a:hover, .sb-nav a.active{ background:var(--panel2); color:var(--cyan); border-left-color:var(--cyan); }
+  .sb-nav .ic{ width:16px; text-align:center; }
+  .sb-foot{ margin-top:auto; padding:0 24px; font-size:0.62rem; color:var(--muted); }
+  .clock{ color:var(--amber); font-size:0.75rem; margin-bottom:8px; }
 
-  main{ position:relative; z-index:1; max-width:1000px; margin:0 auto; padding:0 5%; }
+  /* MAIN */
+  .main{ margin-left:230px; width:100%; position:relative; z-index:2; }
+  .topbar{
+    position:sticky; top:0; z-index:40; background:rgba(6,8,10,0.85); backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--grid-line); padding:16px 40px; display:flex; justify-content:space-between; align-items:center;
+  }
+  .breadcrumb{ font-size:0.75rem; color:var(--muted); }
+  .breadcrumb span{ color:var(--cyan); }
+  .coords{ font-size:0.68rem; color:var(--muted); }
 
-  /* HERO as compass + map intro */
-  #hero{ min-height:94vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding-top:60px; }
-  .compass{ width:90px; height:90px; margin-bottom:22px; animation:rotate 40s linear infinite; }
-  @keyframes rotate{ from{ transform:rotate(0deg); } to{ transform:rotate(360deg); } }
-  .compass svg{ width:100%; height:100%; }
-  .eyebrow{ font-family:var(--hand); font-size:1.3rem; color:var(--rust); margin-bottom:10px; }
-  h1.hero-title{ font-family:var(--serif); font-size:clamp(2.2rem,6vw,3.6rem); font-weight:700; line-height:1.15; margin-bottom:20px; }
-  h1.hero-title em{ font-style:italic; color:var(--rust); font-weight:500; }
-  .hero-sub{ color:var(--ink-soft); font-size:1.08rem; line-height:1.8; max-width:540px; margin-bottom:32px; }
-  .btn-row{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+  .panel{ padding:50px 40px 20px; max-width:1100px; }
+  .panel-head{ display:flex; align-items:baseline; gap:14px; margin-bottom:34px; }
+  .panel-tag{ font-size:0.7rem; color:var(--amber); border:1px solid var(--amber); padding:3px 9px; border-radius:3px; }
+  .panel-title{ font-size:1.7rem; font-weight:700; color:var(--text); letter-spacing:-0.5px; }
+  .panel-sub{ color:var(--muted); font-size:0.85rem; margin:-20px 0 30px; max-width:600px; line-height:1.6; }
+
+  /* HERO */
+  .hero-panel{ padding:60px 40px 40px; }
+  .hero-id{ font-size:0.75rem; color:var(--cyan); letter-spacing:2px; margin-bottom:16px; }
+  .hero-title{ font-size:clamp(2rem,5vw,3.4rem); font-weight:800; letter-spacing:-1.5px; line-height:1.1; margin-bottom:20px; }
+  .hero-title .accent{ color:var(--cyan); }
+  .hero-desc{ color:var(--muted); max-width:580px; line-height:1.8; font-size:0.92rem; margin-bottom:30px; }
+  .hero-btns{ display:flex; gap:14px; flex-wrap:wrap; }
   .btn{
-    font-family:var(--body); font-size:0.9rem; padding:12px 28px; border:1.5px solid var(--ink); border-radius:2px;
-    color:var(--ink); text-decoration:none; transition:all .3s; background:transparent;
+    font-size:0.78rem; padding:11px 22px; border:1px solid var(--grid-line); border-radius:4px;
+    color:var(--text); text-decoration:none; transition:all .25s;
   }
-  .btn:hover{ background:var(--ink); color:var(--paper); }
-  .btn.rust{ border-color:var(--rust); color:var(--rust); }
-  .btn.rust:hover{ background:var(--rust); color:var(--paper); }
+  .btn:hover{ border-color:var(--cyan); color:var(--cyan); background:rgba(100,255,218,0.05); }
+  .btn.primary{ background:var(--cyan); color:#000; border-color:var(--cyan); }
+  .btn.primary:hover{ opacity:0.85; }
 
-  /* Section headers like map legend titles */
-  .sec-head{ margin:90px 0 40px; text-align:center; }
-  .sec-head .label{ font-family:var(--hand); color:var(--rust); font-size:1.2rem; }
-  .sec-head h2{ font-family:var(--serif); font-size:1.8rem; font-weight:600; margin-top:4px; }
-  .sec-divider{ width:60px; height:2px; background:var(--gold); margin:16px auto 0; }
+  .stat-strip{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--grid-line); margin-top:40px; border:1px solid var(--grid-line); }
+  .stat-cell{ background:var(--panel); padding:18px; text-align:center; }
+  .stat-cell .val{ font-size:1.5rem; font-weight:700; color:var(--amber); }
+  .stat-cell .lbl{ font-size:0.62rem; color:var(--muted); margin-top:4px; text-transform:uppercase; letter-spacing:0.5px; }
 
-  /* JOURNEY MAP — route with pins */
-  .journey{ position:relative; padding:20px 0 40px; }
-  .route-line{
-    position:absolute; left:28px; top:0; bottom:0; width:2px;
-    background:repeating-linear-gradient(to bottom, var(--gold) 0 8px, transparent 8px 16px);
+  /* Generic cards */
+  .grid-cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
+  .card{ background:var(--panel); border:1px solid var(--grid-line); border-radius:6px; padding:20px; transition:border-color .25s, transform .25s; }
+  .card:hover{ border-color:var(--cyan); transform:translateY(-2px); }
+  .card h4{ font-size:0.68rem; color:var(--cyan); letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; }
+  .chip-row{ display:flex; flex-wrap:wrap; gap:7px; }
+  .chip{ font-size:0.72rem; padding:5px 11px; border:1px solid var(--grid-line); border-radius:20px; color:var(--text); transition:.2s; }
+  .chip:hover{ background:var(--cyan); color:#000; border-color:var(--cyan); }
+
+  /* Projects */
+  .proj{ background:var(--panel); border:1px solid var(--grid-line); border-radius:6px; padding:20px 22px; margin-bottom:12px; cursor:pointer; transition:border-color .25s; }
+  .proj:hover{ border-color:var(--amber); }
+  .proj-top{ display:flex; justify-content:space-between; gap:16px; align-items:center; }
+  .proj-title{ font-size:0.95rem; font-weight:700; }
+  .proj-date{ font-size:0.68rem; color:var(--muted); white-space:nowrap; }
+  .proj-arrow{ color:var(--amber); font-size:0.9rem; transition:transform .3s; }
+  .proj.open .proj-arrow{ transform:rotate(45deg); }
+  .proj-desc{ color:var(--muted); font-size:0.82rem; line-height:1.6; max-height:0; opacity:0; overflow:hidden; transition:all .35s; }
+  .proj.open .proj-desc{ max-height:200px; opacity:1; margin-top:12px; }
+
+  /* Timeline */
+  .tl{ border-left:1px solid var(--grid-line); padding-left:26px; }
+  .tl-item{ margin-bottom:30px; position:relative; }
+  .tl-item::before{ content:''; position:absolute; left:-31px; top:3px; width:9px; height:9px; border-radius:50%; background:var(--bg); border:2px solid var(--cyan); }
+  .tl-date{ font-size:0.68rem; color:var(--amber); margin-bottom:4px; }
+  .tl-role{ font-weight:700; font-size:0.95rem; }
+  .tl-org{ color:var(--muted); font-size:0.8rem; margin-top:2px; }
+
+  /* Filters */
+  .filter-bar{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
+  .filter-btn{
+    font-size:0.72rem; padding:7px 15px; border-radius:20px; border:1px solid var(--grid-line);
+    background:transparent; color:var(--muted); cursor:pointer; transition:all .2s; font-family:var(--mono);
   }
-  .journey-stop{ position:relative; padding-left:70px; margin-bottom:42px; cursor:pointer; }
-  .pin{
-    position:absolute; left:14px; top:2px; width:30px; height:30px; border-radius:50%;
-    background:var(--paper); border:2px solid var(--rust); display:flex; align-items:center; justify-content:center;
-    font-size:0.9rem; transition:transform .25s, box-shadow .25s; z-index:2;
+  .filter-btn:hover{ color:var(--text); }
+  .filter-btn.active{ background:var(--cyan); color:#000; border-color:var(--cyan); }
+  .search-box{
+    width:100%; max-width:340px; padding:10px 14px; background:var(--panel2); border:1px solid var(--grid-line);
+    border-radius:6px; color:var(--text); font-family:var(--mono); font-size:0.8rem; margin-bottom:24px;
   }
-  .journey-stop:hover .pin{ transform:scale(1.15); box-shadow:0 0 0 6px rgba(181,84,42,0.12); }
-  .stop-date{ font-family:var(--hand); color:var(--rust); font-size:1.1rem; }
-  .stop-title{ font-family:var(--serif); font-weight:600; font-size:1.15rem; margin-top:2px; }
-  .stop-org{ color:var(--ink-soft); font-size:0.92rem; margin-top:2px; }
-  .stop-detail{
-    max-height:0; opacity:0; overflow:hidden; transition:all .4s; margin-top:0;
-    color:var(--ink-soft); font-size:0.92rem; line-height:1.7; border-left:2px solid var(--gold); padding-left:14px;
-  }
-  .journey-stop.open .stop-detail{ max-height:150px; opacity:1; margin-top:12px; }
-  .stop-arrow{ font-family:var(--hand); color:var(--gold); font-size:1rem; margin-left:8px; }
+  .search-box::placeholder{ color:var(--muted); }
+  .search-box:focus{ outline:none; border-color:var(--cyan); }
 
-  /* SKILLS as "tools in the satchel" */
-  .satchel-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px; }
-  .satchel-card{
-    background:var(--paper-dark); border:1px solid var(--border); border-radius:4px; padding:22px;
-    position:relative;
-  }
-  .satchel-card::before{ content:'✦'; position:absolute; top:12px; right:14px; color:var(--gold); font-size:0.8rem; opacity:0.5; }
-  .satchel-card h4{ font-family:var(--serif); font-size:1rem; color:var(--rust); margin-bottom:12px; font-weight:600; }
-  .chip-row{ display:flex; flex-wrap:wrap; gap:8px; }
-  .chip{ font-size:0.85rem; padding:5px 13px; border:1px solid var(--border); border-radius:14px; color:var(--ink); background:var(--paper); transition:.2s; }
-  .chip:hover{ border-color:var(--rust); color:var(--rust); }
+  /* Achievement cards */
+  .ach-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; }
+  .ach-card{ background:var(--panel); border:1px solid var(--grid-line); border-radius:6px; padding:18px; position:relative; overflow:hidden; }
+  .ach-card::before{ content:'🏆'; position:absolute; top:14px; right:16px; opacity:0.15; font-size:1.6rem; }
+  .ach-tag{ font-size:0.62rem; color:var(--amber); text-transform:uppercase; letter-spacing:0.5px; }
+  .ach-title{ font-weight:600; font-size:0.88rem; margin:8px 0 4px; max-width:85%; }
+  .ach-org{ font-size:0.72rem; color:var(--muted); }
 
-  /* PROJECTS as "field notes" entries */
-  .note-entry{ border-bottom:1px dashed var(--border); padding:20px 0; cursor:pointer; }
-  .note-top{ display:flex; justify-content:space-between; align-items:baseline; gap:14px; }
-  .note-title{ font-family:var(--serif); font-weight:600; font-size:1.1rem; }
-  .note-date{ font-family:var(--hand); color:var(--rust); font-size:1rem; white-space:nowrap; }
-  .note-desc{ color:var(--ink-soft); font-size:0.92rem; line-height:1.7; max-height:0; opacity:0; overflow:hidden; transition:all .4s; }
-  .note-entry.open .note-desc{ max-height:150px; opacity:1; margin-top:10px; }
+  /* Extracurricular list */
+  .ec-list{ display:flex; flex-direction:column; gap:1px; background:var(--grid-line); border:1px solid var(--grid-line); border-radius:6px; overflow:hidden; }
+  .ec-item{ background:var(--panel); padding:14px 18px; display:flex; justify-content:space-between; gap:20px; align-items:center; flex-wrap:wrap; transition:background .2s; }
+  .ec-item:hover{ background:var(--panel2); }
+  .ec-role{ font-size:0.85rem; font-weight:600; }
+  .ec-org{ font-size:0.75rem; color:var(--muted); }
+  .ec-right{ display:flex; align-items:center; gap:14px; }
+  .ec-date{ font-size:0.68rem; color:var(--cyan); white-space:nowrap; }
+  .ec-cat{ font-size:0.6rem; padding:3px 9px; border-radius:10px; background:var(--panel2); color:var(--muted); border:1px solid var(--grid-line); }
+  .ec-count{ font-size:0.75rem; color:var(--muted); margin-bottom:16px; }
 
-  /* ACHIEVEMENTS as "stamps in a passport" */
-  .filter-row{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:28px; }
-  .filter-btn{ font-family:var(--body); font-size:0.82rem; padding:7px 16px; border-radius:16px; border:1px solid var(--border); background:transparent; color:var(--ink-soft); cursor:pointer; transition:.2s; }
-  .filter-btn.active, .filter-btn:hover{ background:var(--rust); color:#fff; border-color:var(--rust); }
-  .stamp-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; }
-  .stamp{
-    border:2px dashed var(--border); border-radius:6px; padding:18px; text-align:center;
-    transform:rotate(calc(var(--r, 0) * 1deg)); transition:transform .3s;
-  }
-  .stamp:hover{ transform:rotate(0deg) scale(1.03); border-color:var(--rust); }
-  .stamp-tag{ font-family:var(--hand); color:var(--teal); font-size:0.95rem; }
-  .stamp-title{ font-weight:600; font-size:0.88rem; margin:6px 0 4px; }
-  .stamp-org{ color:var(--ink-soft); font-size:0.78rem; }
+  /* Languages */
+  .lang-card{ display:flex; align-items:center; gap:20px; background:var(--panel); border:1px solid var(--grid-line); border-radius:6px; padding:20px; }
+  .lang-bars{ display:flex; gap:6px; }
+  .lang-level{ width:28px; height:10px; border-radius:2px; background:var(--grid-line); }
+  .lang-level.filled{ background:var(--cyan); }
 
-  /* ACTIVITIES as "postcards sent" list */
-  .search-input{
-    width:100%; max-width:340px; display:block; margin:0 auto 20px; padding:10px 16px;
-    background:var(--paper); border:1px solid var(--border); border-radius:20px; color:var(--ink);
-    font-family:var(--body); font-size:0.92rem;
-  }
-  .search-input:focus{ outline:none; border-color:var(--rust); }
-  .postcard-row{
-    display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; align-items:center;
-    padding:12px 18px; border:1px solid var(--border); border-radius:4px; margin-bottom:7px; background:var(--paper-dark);
-  }
-  .pc-role{ font-weight:600; font-size:0.9rem; }
-  .pc-org{ color:var(--ink-soft); font-size:0.8rem; }
-  .pc-date{ font-family:var(--hand); color:var(--rust); font-size:0.92rem; }
-  .entry-count{ text-align:center; color:var(--ink-soft); font-size:0.85rem; margin-bottom:14px; font-family:var(--hand); }
+  /* Certifications */
+  .cert-card{ background:var(--panel); border:1px solid var(--grid-line); border-radius:6px; padding:16px 18px; }
+  .cert-issuer{ font-size:0.65rem; color:var(--amber); text-transform:uppercase; letter-spacing:0.5px; }
+  .cert-title{ font-weight:600; font-size:0.85rem; margin:6px 0 4px; }
+  .cert-date{ font-size:0.68rem; color:var(--muted); }
 
-  /* CERTS as "souvenirs collected" */
-  .souvenir-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; }
-  .souvenir{ background:var(--paper-dark); border:1px solid var(--border); border-radius:4px; padding:16px 18px; }
-  .souvenir-issuer{ font-family:var(--hand); color:var(--teal); font-size:0.95rem; }
-  .souvenir-title{ font-weight:600; font-size:0.88rem; margin:6px 0 3px; }
-  .souvenir-date{ color:var(--ink-soft); font-size:0.78rem; }
+  /* Contact */
+  .contact-box{ text-align:center; padding:60px 20px; }
+  .big-email{ font-size:clamp(1.3rem,4vw,2.2rem); font-weight:800; color:var(--text); text-decoration:none; }
+  .big-email:hover{ color:var(--cyan); }
+  .contact-links{ display:flex; justify-content:center; gap:24px; margin-top:28px; flex-wrap:wrap; }
+  .contact-links a{ color:var(--muted); text-decoration:none; font-size:0.82rem; }
+  .contact-links a:hover{ color:var(--cyan); }
 
-  /* CONTACT as "send a letter" */
-  #contact{ text-align:center; padding:100px 0; }
-  .envelope{
-    display:inline-block; border:1.5px solid var(--ink); border-radius:4px; padding:40px 48px;
-    background:var(--paper-dark); position:relative;
-  }
-  .envelope::before{ content:'✉'; font-size:1.8rem; color:var(--rust); display:block; margin-bottom:14px; }
-  .big-email{ font-family:var(--serif); font-size:clamp(1.2rem,4vw,1.8rem); color:var(--ink); text-decoration:none; font-weight:600; }
-  .big-email:hover{ color:var(--rust); }
-  .contact-links{ display:flex; justify-content:center; gap:22px; margin-top:22px; flex-wrap:wrap; }
-  .contact-links a{ color:var(--ink-soft); text-decoration:none; font-size:0.88rem; }
-  .contact-links a:hover{ color:var(--rust); }
+  footer{ text-align:center; padding:30px; color:var(--muted); font-size:0.65rem; border-top:1px solid var(--grid-line); }
 
-  footer{ text-align:center; padding:30px; color:var(--ink-soft); font-size:0.82rem; border-top:1px solid var(--border); font-family:var(--hand); font-size:1.1rem; }
-
-  @media(max-width:768px){
-    nav ul{ display:none; }
-    .route-line{ left:20px; }
-    .journey-stop{ padding-left:56px; }
-    .pin{ left:6px; width:26px; height:26px; }
+  @media(max-width:900px){
+    .sidebar{ display:none; }
+    .main{ margin-left:0; }
+    .stat-strip{ grid-template-columns:repeat(2,1fr); }
   }
 </style>
 </head>
 <body>
 
-<div class="paper-texture"></div>
+<div class="hud-bg"></div>
+<div class="scanline"></div>
 
-<nav>
-  <div class="logo">S.R. <span>Gupta</span></div>
-  <ul>
-    <li><a href="#journey">Journey</a></li>
-    <li><a href="#skills">Satchel</a></li>
-    <li><a href="#projects">Field Notes</a></li>
-    <li><a href="#achievements">Stamps</a></li>
-    <li><a href="#activities">Postcards</a></li>
-    <li><a href="#contact">Write</a></li>
-  </ul>
-</nav>
+<div class="sidebar">
+  <div class="sb-logo">
+    <div class="name">SRI RAM GUPTA</div>
+    <div class="role">ELECTRICAL · ROBOTICS · POWER</div>
+    <div class="sb-status"><div class="led"></div> STATUS: AVAILABLE</div>
+  </div>
+  <div class="sb-nav">
+    <a href="#hero"><span class="ic">◉</span> Overview</a>
+    <a href="#skills"><span class="ic">▣</span> Skills</a>
+    <a href="#projects"><span class="ic">◆</span> Projects</a>
+    <a href="#experience"><span class="ic">▲</span> Experience</a>
+    <a href="#certs"><span class="ic">✦</span> Certifications</a>
+    <a href="#achievements"><span class="ic">★</span> Achievements</a>
+    <a href="#extracurricular"><span class="ic">⬡</span> Activities Log</a>
+    <a href="#languages"><span class="ic">◐</span> Languages</a>
+    <a href="#contact"><span class="ic">▶</span> Contact</a>
+  </div>
+  <div class="sb-foot">
+    <div class="clock" id="liveClock">00:00:00</div>
+    <div>NIT CALICUT · GE VERNOVA<br/>HYDERABAD, IN</div>
+  </div>
+</div>
 
-<main>
-  <section id="hero">
-    <div class="compass">
-      <svg viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="46" fill="none" stroke="#2e2820" stroke-width="1.5"/>
-        <circle cx="50" cy="50" r="2.5" fill="#b5542a"/>
-        <path d="M50,10 L56,50 L50,90 L44,50 Z" fill="#b5542a" opacity="0.85"/>
-        <path d="M10,50 L50,44 L90,50 L50,56 Z" fill="#2e2820" opacity="0.6"/>
-        <text x="50" y="22" text-anchor="middle" font-size="8" fill="#2e2820" font-family="serif">N</text>
-      </svg>
-    </div>
-    <div class="eyebrow">an engineer's atlas</div>
-    <h1 class="hero-title">Maddula Sri Ram <em>Gupta</em></h1>
-    <p class="hero-sub">
-      A map of places I've studied, built things, and left a little mark — from Hyderabad to Coimbatore to Kozhikode, now charting a course at GE Vernova.
+<div class="main">
+  <div class="topbar">
+    <div class="breadcrumb">SYSTEM / <span id="activeSection">OVERVIEW</span></div>
+    <div class="coords">LAT 17.38°N · LON 78.48°E</div>
+  </div>
+
+  <section id="hero" class="hero-panel">
+    <div class="hero-id">// PROFILE_ID: SRG-2026 — ACTIVE</div>
+    <h1 class="hero-title">Maddula Sri Ram <span class="accent">Gupta.</span></h1>
+    <p class="hero-desc">
+      Edison Engineer @ GE Vernova — Gas Power Engineering, Controls Platform Software Development.
+      M.Tech in Industrial Power & Automation from NIT Calicut. I build control systems, autonomous
+      multi-robot architectures, and the occasional overcomplicated side project.
     </p>
-    <div class="btn-row">
-      <a href="#journey" class="btn rust">Trace My Journey</a>
-      <a href="#contact" class="btn">Send a Letter</a>
+    <div class="hero-btns">
+      <a href="#projects" class="btn primary">View Projects</a>
+      <a href="#contact" class="btn">Transmit Message</a>
+    </div>
+    <div class="stat-strip">
+      <div class="stat-cell"><div class="val">9.88</div><div class="lbl">M.Tech CGPA</div></div>
+      <div class="stat-cell"><div class="val">2</div><div class="lbl">Gold Medals</div></div>
+      <div class="stat-cell"><div class="val">15+</div><div class="lbl">Awards</div></div>
+      <div class="stat-cell"><div class="val">40+</div><div class="lbl">Roles Held</div></div>
     </div>
   </section>
 
-  <section id="journey">
-    <div class="sec-head"><div class="label">chapter one</div><h2>The Journey</h2><div class="sec-divider"></div></div>
-    <div class="journey">
-      <div class="route-line"></div>
-      <div id="journeyList"></div>
+  <section id="skills" class="panel">
+    <div class="panel-head"><span class="panel-tag">MODULE 01</span><span class="panel-title">Skills</span></div>
+    <div class="grid-cards">
+      <div class="card"><h4>Languages</h4><div class="chip-row"><div class="chip">C</div><div class="chip">C#</div><div class="chip">Python</div></div></div>
+      <div class="card"><h4>Tools</h4><div class="chip-row"><div class="chip">MATLAB</div><div class="chip">LabVIEW</div><div class="chip">ROS2</div><div class="chip">Gazebo</div></div></div>
+      <div class="card"><h4>Platforms</h4><div class="chip-row"><div class="chip">Arduino</div><div class="chip">RPi</div><div class="chip">Pico</div><div class="chip">ESP8266</div><div class="chip">ESP32</div><div class="chip">Ubuntu</div></div></div>
+      <div class="card"><h4>Programs</h4><div class="chip-row"><div class="chip">NVIDIA Developer</div><div class="chip">Arm Developer</div></div></div>
     </div>
   </section>
 
-  <section id="skills">
-    <div class="sec-head"><div class="label">chapter two</div><h2>Tools in the Satchel</h2><div class="sec-divider"></div></div>
-    <div class="satchel-grid">
-      <div class="satchel-card"><h4>Languages</h4><div class="chip-row"><div class="chip">C</div><div class="chip">C#</div><div class="chip">Python</div><div class="chip">German</div></div></div>
-      <div class="satchel-card"><h4>Tools & Frameworks</h4><div class="chip-row"><div class="chip">MATLAB</div><div class="chip">LabVIEW</div><div class="chip">ROS2</div><div class="chip">Gazebo</div></div></div>
-      <div class="satchel-card"><h4>Platforms</h4><div class="chip-row"><div class="chip">Arduino</div><div class="chip">Raspberry Pi</div><div class="chip">ESP32</div><div class="chip">Ubuntu</div></div></div>
-      <div class="satchel-card"><h4>Fellowships</h4><div class="chip-row"><div class="chip">NVIDIA Developer</div><div class="chip">Arm Developer</div></div></div>
+  <section id="projects" class="panel">
+    <div class="panel-head"><span class="panel-tag">MODULE 02</span><span class="panel-title">Projects</span></div>
+    <div id="projectList"></div>
+  </section>
+
+  <section id="experience" class="panel">
+    <div class="panel-head"><span class="panel-tag">MODULE 03</span><span class="panel-title">Experience & Education</span></div>
+    <div class="tl" id="timeline"></div>
+  </section>
+
+  <section id="certs" class="panel">
+    <div class="panel-head"><span class="panel-tag">MODULE 04</span><span class="panel-title">Certifications</span></div>
+    <div class="grid-cards" id="certGrid"></div>
+  </section>
+
+  <section id="achievements" class="panel">
+    <div class="panel-head"><span class="panel-tag">MODULE 05</span><span class="panel-title">Achievements</span></div>
+    <div class="filter-bar" id="achFilters"></div>
+    <div class="ach-grid" id="achGrid"></div>
+  </section>
+
+  <section id="extracurricular" class="panel">
+    <div class="panel-head"><span class="panel-tag">MODULE 06</span><span class="panel-title">Activities Log</span></div>
+    <p class="panel-sub">40+ roles across IEEE, NIT Calicut committees, and Amrita. Filter by category or search.</p>
+    <input type="text" class="search-box" id="ecSearch" placeholder="Search roles, organizations..." />
+    <div class="filter-bar" id="ecFilters"></div>
+    <div class="ec-count" id="ecCount"></div>
+    <div class="ec-list" id="ecList"></div>
+  </section>
+
+  <section id="languages" class="panel">
+    <div class="panel-head"><span class="panel-tag">MODULE 07</span><span class="panel-title">Languages</span></div>
+    <div class="lang-card">
+      <div style="flex:1;">
+        <div style="font-weight:700;">German — Level 3 (Advanced)</div>
+        <div style="color:var(--muted); font-size:0.78rem; margin-top:4px;">Vivekananda Institute of Languages, Ramakrishna Math, Hyderabad · Jun–Apr 2025</div>
+        <div style="color:var(--muted); font-size:0.72rem; margin-top:2px;">Grades: Level 1 – A+ · Level 2 – A+ · Level 3 – A+ (latest)</div>
+      </div>
+      <div class="lang-bars">
+        <div class="lang-level filled"></div><div class="lang-level filled"></div><div class="lang-level filled"></div>
+      </div>
     </div>
   </section>
 
-  <section id="projects">
-    <div class="sec-head"><div class="label">chapter three</div><h2>Field Notes</h2><div class="sec-divider"></div></div>
-    <div id="noteList"></div>
-  </section>
-
-  <section id="achievements">
-    <div class="sec-head"><div class="label">chapter four</div><h2>Stamps in the Passport</h2><div class="sec-divider"></div></div>
-    <div class="filter-row" id="achFilters"></div>
-    <div class="stamp-grid" id="stampGrid"></div>
-  </section>
-
-  <section id="activities">
-    <div class="sec-head"><div class="label">chapter five</div><h2>Postcards Sent Along the Way</h2><div class="sec-divider"></div></div>
-    <input type="text" class="search-input" id="pcSearch" placeholder="Search roles, places..." />
-    <div class="filter-row" id="pcFilters"></div>
-    <div class="entry-count" id="pcCount"></div>
-    <div id="pcList"></div>
-  </section>
-
-  <section id="certs">
-    <div class="sec-head"><div class="label">chapter six</div><h2>Souvenirs Collected</h2><div class="sec-divider"></div></div>
-    <div class="souvenir-grid" id="souvenirGrid"></div>
-  </section>
-
-  <section id="contact">
-    <div class="sec-head"><div class="label">final chapter</div><h2>Write to Me</h2><div class="sec-divider"></div></div>
-    <div class="envelope">
+  <section id="contact" class="panel">
+    <div class="contact-box">
+      <div class="panel-tag" style="margin-bottom:16px; display:inline-block;">MODULE 08 — TRANSMIT</div>
+      <br/><br/>
       <a href="mailto:sriramgupta21@gmail.com" class="big-email">sriramgupta21@gmail.com</a>
       <div class="contact-links">
         <a href="tel:+917287878705">+91 72878 78705</a>
@@ -272,189 +314,220 @@
       </div>
     </div>
   </section>
-</main>
 
-<footer>— the map is never quite finished — © <span id="year"></span></footer>
+  <footer>© <span id="year"></span> MADDULA SRI RAM GUPTA — SYSTEM BUILT FROM SCRATCH. NO TEMPLATES WERE HARMED.</footer>
+</div>
 
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();
 
-/* JOURNEY */
-const journey = [
-  { date:"2026 — onward", icon:"⚙", title:"Edison Engineer, Gas Power Engineering", org:"GE Vernova, HTC, India", desc:"Rotation one: Controls Platform Software Development." },
-  { date:"2024 — 2026", icon:"🎓", title:"M.Tech, Industrial Power & Automation", org:"NIT Calicut · CGPA 9.88/10, Gold Medalist", desc:"Research on adaptive multi-robot coordination and control." },
-  { date:"2020 — 2024", icon:"🎓", title:"B.Tech, Electrical & Electronics Engineering", org:"Amrita School of Engineering, Coimbatore · CGPA 9.47/10, Gold Medalist", desc:"Best Outgoing Student. Built a SCADA system and led the Gen-E association." },
-  { date:"2018 — 2020", icon:"📘", title:"Higher Secondary Certificate", org:"FIITJEE Junior College, Hyderabad · 91.4%", desc:"Where the path toward engineering first took shape." },
-  { date:"— 2018", icon:"🏡", title:"Secondary School Certificate", org:"St. Joseph's School, Hyderabad · 87%", desc:"Home base — where every journey begins." },
-];
-const journeyList = document.getElementById('journeyList');
-journey.forEach(j=>{
-  const el=document.createElement('div');
-  el.className='journey-stop';
-  el.innerHTML=`
-    <div class="pin">${j.icon}</div>
-    <div class="stop-date">${j.date}</div>
-    <div class="stop-title">${j.title}<span class="stop-arrow">✎</span></div>
-    <div class="stop-org">${j.org}</div>
-    <div class="stop-detail">${j.desc}</div>
-  `;
-  el.addEventListener('click', ()=> el.classList.toggle('open'));
-  journeyList.appendChild(el);
+/* Live clock */
+function tick(){
+  const now = new Date();
+  document.getElementById('liveClock').textContent = now.toLocaleTimeString('en-GB');
+}
+setInterval(tick, 1000); tick();
+
+/* Active nav highlight */
+const sections = document.querySelectorAll('section');
+const navLinks = document.querySelectorAll('.sb-nav a');
+const breadcrumb = document.getElementById('activeSection');
+window.addEventListener('scroll', ()=>{
+  let current = sections[0].id;
+  sections.forEach(s=>{ if(window.scrollY >= s.offsetTop - 200) current = s.id; });
+  navLinks.forEach(a=>{
+    a.classList.toggle('active', a.getAttribute('href') === '#'+current);
+  });
+  breadcrumb.textContent = current.toUpperCase();
 });
 
-/* PROJECTS as field notes */
-const notes = [
-  { title:"Adaptive Multi-Robot Coordination & Control", date:"'25–'26", desc:"M.Tech thesis — leader-follower coordination for heterogeneous robots under uncertainty." },
-  { title:"AI Safety Interlock for Two-Wheelers", date:"'26", desc:"Qualcomm & Arduino challenge entry — CV helmet detection that blocks ignition." },
-  { title:"SCADA for a Smart Microgrid", date:"'23–'24", desc:"B.Tech thesis — real-time monitoring & predictive management for a microgrid testbed." },
-  { title:"Smart Residential Energy Management", date:"'24", desc:"App-controlled load shedding with backup time estimation." },
-  { title:"Energy Audit — Footwear Manufacturer", date:"'24", desc:"Audited a 9,200 pairs/day facility for efficiency gains." },
-  { title:"Overload Protection for Induction Motors", date:"'23", desc:"NodeMCU + cloud app monitoring motor faults in real time." },
-  { title:"Smart Irrigation System", date:"'23", desc:"IoT-based irrigation to reduce water wastage, built on ESP8266." },
-  { title:"Color Sense Bot", date:"'23", desc:"3-wheel robot that follows color-coded instructions via a sensor." },
-  { title:"Infrastructure Study, Dalapur (UP)", date:"'23", desc:"Rural development initiative using Participatory Rural Appraisal tools." },
+/* PROJECTS */
+const projects = [
+  { title:"Adaptive Heterogeneous Multi-Robot Coordination and Control", date:"Jan 2025 – Jun 2026", desc:"M.Tech Major Project — Leader-follower coordination strategy for two heterogeneous mobile robots, handling system uncertainties in multi-robot missions." },
+  { title:"AI-Enabled Safety Interlock System for Two-Wheelers", date:"Jan 2026 – Feb 2026", desc:"Qualcomm & Arduino 'AI for All' challenge entry — CV-based helmet detection on Arduino UNO Q, blocking ignition if rider isn't wearing a helmet." },
+  { title:"Color-based Object Sorting System", date:"Apr 2025 – May 2025", desc:"Automated classification using a color sensor to sort objects into corresponding containers for industrial use." },
+  { title:"Smart Residential Energy Management", date:"Nov 2024 – Dec 2024", desc:"App-controlled load shedding with real-time source switching and backup time estimation." },
+  { title:"Preliminary Energy Audit — Morbido Vinyl Pvt. Ltd.", date:"Nov 2024", desc:"Energy audit of a footwear manufacturing facility (9,200 pairs/day) to identify efficiency gains." },
+  { title:"SCADA for a Smart Microgrid", date:"Sep 2023 – May 2024", desc:"B.Tech Major Project — SCADA implementation with real-time monitoring and predictive energy management." },
+  { title:"Overload Protection of Induction Motor", date:"Oct 2023 – Nov 2023", desc:"NodeMCU ESP8266 + cloud app for monitoring and protecting single-phase induction motors." },
+  { title:"Smart Irrigation System", date:"Mar 2023 – May 2023", desc:"IoT-based automated irrigation using NodeMCU ESP8266 to reduce water wastage." },
+  { title:"Color Sense Bot", date:"Apr 2023 – May 2023", desc:"3-wheel robot using PIC16F877A and TCS3200 sensor, responding to color cards." },
+  { title:"Live-in-Labs: Infrastructure at Dalapur, UP", date:"Feb 2023 – Aug 2023", desc:"Rural development initiative using Participatory Rural Appraisal (PRA) tools." },
 ];
-const noteList = document.getElementById('noteList');
-notes.forEach(n=>{
-  const el=document.createElement('div');
-  el.className='note-entry';
-  el.innerHTML=`<div class="note-top"><div class="note-title">${n.title}</div><div class="note-date">${n.date}</div></div><div class="note-desc">${n.desc}</div>`;
+const projectList = document.getElementById('projectList');
+projects.forEach(p=>{
+  const el = document.createElement('div');
+  el.className='proj';
+  el.innerHTML = `<div class="proj-top"><div class="proj-title">${p.title}</div><div style="display:flex;align-items:center;gap:14px;"><div class="proj-date">${p.date}</div><div class="proj-arrow">+</div></div></div><div class="proj-desc">${p.desc}</div>`;
   el.addEventListener('click', ()=> el.classList.toggle('open'));
-  noteList.appendChild(el);
+  projectList.appendChild(el);
 });
 
-/* ACHIEVEMENTS as stamps */
+/* TIMELINE */
+const timelineData = [
+  { date:"Jul 2026 – Present", role:"Edison Engineer — Gas Power Engineering", org:"GE Vernova, HTC, India" },
+  { date:"2024 – 2026", role:"M.Tech, Industrial Power & Automation", org:"NIT Calicut · CGPA 9.88/10 · Gold Medalist" },
+  { date:"2020 – 2024", role:"B.Tech, Electrical and Electronics Engineering", org:"Amrita School of Engineering · CGPA 9.47/10 · Gold Medalist, Best Outgoing Student" },
+  { date:"Jun 2020", role:"Higher Secondary Certificate", org:"FIITJEE Junior College, Hyderabad · 91.4%" },
+  { date:"May 2018", role:"Secondary School Certificate", org:"St. Joseph's School, Hyderabad · 87%" },
+];
+const timelineEl = document.getElementById('timeline');
+timelineData.forEach(t=>{
+  const el = document.createElement('div');
+  el.className='tl-item';
+  el.innerHTML = `<div class="tl-date">${t.date}</div><div class="tl-role">${t.role}</div><div class="tl-org">${t.org}</div>`;
+  timelineEl.appendChild(el);
+});
+
+/* CERTIFICATIONS */
+const certs = [
+  { title:"Developing IoT Applications", issuer:"Cisco", date:"Sep 2024" },
+  { title:"Wireless Technologies for IoT", issuer:"Cisco", date:"May 2024" },
+  { title:"Blockchain and the Internet of Things", issuer:"Cisco", date:"Apr 2024" },
+  { title:"Grid Automation & Distribution Protection System", issuer:"Tata Power-DDL", date:"Aug 2023" },
+  { title:"Electric Industry Operations and Markets", issuer:"Coursera", date:"Jul 2023" },
+  { title:"Energy Literacy Training", issuer:"Energy Swaraj Foundation", date:"May 2022" },
+  { title:"Introduction to Augmented Reality & AR Core", issuer:"Coursera", date:"Mar 2021" },
+  { title:"Programming for Everyone (Python)", issuer:"Coursera", date:"Jan 2021" },
+  { title:"Graphic Design", issuer:"Coursera", date:"Jan 2021" },
+];
+const certGrid = document.getElementById('certGrid');
+certs.forEach(c=>{
+  const el = document.createElement('div');
+  el.className='cert-card';
+  el.innerHTML = `<div class="cert-issuer">${c.issuer}</div><div class="cert-title">${c.title}</div><div class="cert-date">${c.date}</div>`;
+  certGrid.appendChild(el);
+});
+
+/* ACHIEVEMENTS */
 const achievements = [
-  { title:"Gold Medalist, M.Tech IPA", org:"NIT Calicut", cat:"Academic" },
-  { title:"Finalist, AI for All — Physical AI Edition", org:"Qualcomm & Arduino, New Delhi", cat:"Innovation" },
-  { title:"Winner, Poster & Slogan on Gender-Based Violence", org:"CWSE, NIT Calicut", cat:"Design" },
-  { title:"Winner, Breast Cancer Awareness Poster Contest", org:"NIT Calicut", cat:"Design" },
-  { title:"Winner, IEEE Problem Pulse 2025", org:"IEEE SB NITC & SIGHT", cat:"Hackathon" },
-  { title:"Winner, IEEE Kerala GSAC Logo Contest", org:"IEEE Kerala Section", cat:"Design" },
-  { title:"Runner Up, Hidden Green Photography", org:"IEEE SB MITS", cat:"Design" },
-  { title:"Winner, Idea Hackathon 2025", org:"NIT Calicut", cat:"Hackathon" },
-  { title:"Winner, IWD Poster Presentation", org:"ASEM South Asia", cat:"Design" },
-  { title:"Gold Medalist, B.Tech EEE", org:"Amrita Vishwa Vidyapeetham", cat:"Academic" },
-  { title:"Best Outgoing Student", org:"Amrita Vishwa Vidyapeetham", cat:"Academic" },
-  { title:"Academic Excellence Award", org:"Dept. of EEE, AVV", cat:"Academic" },
-  { title:"2nd Prize, Poster Design, Amritotsavam", org:"AVV", cat:"Design" },
-  { title:"Best Outgoing Student, Sports Day", org:"St. Joseph's School", cat:"Academic" },
+  { title:"Gold Medalist — M.Tech. in IPA (2024-26)", org:"National Institute of Technology Calicut", cat:"Academic" },
+  { title:"Finalist (2nd) — AI for All: Physical AI Edition, India AI Summit 2026", org:"Qualcomm & Arduino", cat:"Innovation" },
+  { title:"Winner — Poster & Slogan on Gender-Based Violence", org:"CWSE, NIT Calicut", cat:"Design" },
+  { title:"Winner — Poster Design, Breast Cancer Awareness Month", org:"BSED, CYHW, CWSE, NIT Calicut", cat:"Design" },
+  { title:"Winner — IEEE Problem Pulse 2025 (Global Hackathon)", org:"IEEE SB NITC & IEEE SIGHT", cat:"Hackathon" },
+  { title:"Winner — IEEE Kerala GSAC Logo Design Contest", org:"IEEE Kerala Section", cat:"Design" },
+  { title:"Runner Up — Hidden Green Photography Contest", org:"IEEE SB MITS, Kerala", cat:"Design" },
+  { title:"Winner — Idea Hackathon 2025, National Environment Day", org:"Centre for Sustainable Technologies, NIT Calicut", cat:"Hackathon" },
+  { title:"Winner — Poster Presentation, International Women's Day 2025", org:"ASEM Regional Centre for South Asia", cat:"Design" },
+  { title:"Designer — IQAC Logo", org:"Amrita Vishwa Vidyapeetham, 2024", cat:"Design" },
+  { title:"Gold Medalist — B.Tech. in EEE (2020-24)", org:"Amrita Vishwa Vidyapeetham, Coimbatore", cat:"Academic" },
+  { title:"Best Outgoing Student Award — B.Tech. EEE", org:"Amrita Vishwa Vidyapeetham", cat:"Academic" },
+  { title:"Academic Excellence Award — 3rd Year", org:"Dept. of EEE, AVV", cat:"Academic" },
+  { title:"2nd Prize — Poster Design Contest, Amritotsavam 2022", org:"Amrita Vishwa Vidyapeetham", cat:"Design" },
+  { title:"Best Outgoing Student Award, Sports Day 2018", org:"Times of India, St. Joseph's School Malakpet", cat:"Other" },
 ];
 const achCats = ["All", ...new Set(achievements.map(a=>a.cat))];
-const stampGrid = document.getElementById('stampGrid');
+const achGrid = document.getElementById('achGrid');
 const achFilters = document.getElementById('achFilters');
-function renderStamps(filter){
-  stampGrid.innerHTML='';
-  achievements.filter(a=>filter==='All'||a.cat===filter).forEach(a=>{
-    const el=document.createElement('div');
-    el.className='stamp';
-    el.style.setProperty('--r', (Math.random()*6-3).toFixed(1));
-    el.innerHTML=`<div class="stamp-tag">${a.cat}</div><div class="stamp-title">${a.title}</div><div class="stamp-org">${a.org}</div>`;
-    stampGrid.appendChild(el);
+function renderAch(filter){
+  achGrid.innerHTML='';
+  achievements.filter(a=> filter==='All' || a.cat===filter).forEach(a=>{
+    const el = document.createElement('div');
+    el.className='ach-card';
+    el.innerHTML = `<div class="ach-tag">${a.cat}</div><div class="ach-title">${a.title}</div><div class="ach-org">${a.org}</div>`;
+    achGrid.appendChild(el);
   });
 }
 achCats.forEach(c=>{
-  const b=document.createElement('button');
-  b.className='filter-btn'+(c==='All'?' active':'');
-  b.textContent=c;
-  b.onclick=()=>{ document.querySelectorAll('#achFilters .filter-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderStamps(c); };
-  achFilters.appendChild(b);
+  const btn = document.createElement('button');
+  btn.className='filter-btn'+(c==='All'?' active':'');
+  btn.textContent=c;
+  btn.onclick=()=>{
+    document.querySelectorAll('#achFilters .filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderAch(c);
+  };
+  achFilters.appendChild(btn);
 });
-renderStamps('All');
+renderAch('All');
 
-/* ACTIVITIES as postcards */
-const postcards = [
-  { role:"Volunteer", org:"U&I Trust", date:"'26–now", cat:"Current" },
-  { role:"Volunteer", org:"Listeners Army", date:"'26–now", cat:"Current" },
-  { role:"NVIDIA Developer Program Member", org:"NVIDIA", date:"'24–now", cat:"Current" },
-  { role:"Arm Developer Program Member", org:"Arm", date:"'24–now", cat:"Current" },
-  { role:"Class Representative, M.Tech IPA", org:"NIT Calicut", date:"'24–'26", cat:"NIT Calicut" },
-  { role:"Branch Representative, M.Tech EE", org:"NIT Calicut", date:"'24–'26", cat:"NIT Calicut" },
-  { role:"Innovation Ambassador", org:"NIT Calicut Innovation Council", date:"'25–'26", cat:"NIT Calicut" },
-  { role:"Student Volunteer, Guidance Cell", org:"NIT Calicut", date:"'25–'26", cat:"NIT Calicut" },
-  { role:"NEP Saarthi", org:"NIT Calicut", date:"'24–'26", cat:"NIT Calicut" },
-  { role:"Student Council Member", org:"NIT Calicut Innovation Council", date:"'25–'26", cat:"NIT Calicut" },
-  { role:"Student Team Member, Clean Energy Centre", org:"NIT Calicut", date:"'25–'26", cat:"NIT Calicut" },
-  { role:"Designer, IEEE Virtual Speakers Bureau", org:"IEEE SAC", date:"'25–'26", cat:"IEEE" },
-  { role:"Student Team Member, CWSE", org:"NIT Calicut", date:"'25–'26", cat:"NIT Calicut" },
-  { role:"Executive Committee Member, Unnati", org:"CWSE, NIT Calicut", date:"'25–'26", cat:"NIT Calicut" },
-  { role:"Web-Master", org:"IEEE PES SBC, NIT Calicut", date:"'25–'26", cat:"IEEE" },
-  { role:"Treasurer", org:"IEEE PES SBC, NIT Calicut", date:"'25–'26", cat:"IEEE" },
-  { role:"Secretary, GSAC", org:"IEEE PES Kerala Chapter", date:"'25–'26", cat:"IEEE" },
-  { role:"Vice Chair, GSAC", org:"IEEE RAS Kerala Chapter", date:"'25–'26", cat:"IEEE" },
-  { role:"Designer", org:"IEEE Kerala Chapter GSAC", date:"'25–'26", cat:"IEEE" },
-  { role:"Ambassador", org:"IEEE PES Malabar Hub", date:"'25–'26", cat:"IEEE" },
-  { role:"Student Coordinator, Tinkherhack 4.0", org:"CWSE & NIT Calicut", date:"'26", cat:"NIT Calicut" },
-  { role:"Student Coordinator, PERC 2026", org:"NIT Calicut", date:"'25–'26", cat:"NIT Calicut" },
-  { role:"Student Volunteer, Alumni Day", org:"NIT Calicut", date:"'25", cat:"NIT Calicut" },
-  { role:"Student Volunteer, NPEC 2025", org:"NIT Calicut", date:"'25", cat:"NIT Calicut" },
-  { role:"Student Volunteer, ICRAR & WLP 2025", org:"CWSE, NIT Calicut", date:"'25", cat:"NIT Calicut" },
-  { role:"Student Volunteer, Wellness Seminar", org:"SGC, NIT Calicut", date:"'25", cat:"NIT Calicut" },
-  { role:"Organising Co-Lead, PES YP Conclave", org:"IEEE PES Kerala", date:"'25", cat:"IEEE" },
-  { role:"Mentor & Judge, Hack4Good", org:"IEEE SPS Kerala", date:"'24", cat:"IEEE" },
-  { role:"Central Coordinator, Cultural Activities", org:"Amrita Vishwa Vidyapeetham", date:"'23–'24", cat:"Amrita" },
-  { role:"President", org:"Gen-E, Dept. of EEE, Amrita", date:"'23–'24", cat:"Amrita" },
-  { role:"Secretary", org:"INCOSE Amrita Chapter", date:"'22–'24", cat:"Amrita" },
-  { role:"Advisor & Designer, WMD Team", org:"Anokha Techfest", date:"'23–'24", cat:"Amrita" },
-  { role:"Multimedia Designer", org:"Srishti Literary Club", date:"'22–'24", cat:"Amrita" },
-  { role:"Executive Lead", org:"Gen-E, Amrita", date:"'22–'23", cat:"Amrita" },
-  { role:"Graphic Designer", org:"Team Media, AVV", date:"'22–'24", cat:"Amrita" },
-  { role:"Designer, Elektron Magazine", org:"Gen-E, Amrita", date:"'21–'24", cat:"Amrita" },
-  { role:"Crew Member, Astra REEV", org:"Team Astra", date:"'22–'23", cat:"Amrita" },
-  { role:"Content Writer", org:"Brainly", date:"'21", cat:"Other" },
-  { role:"Class Representative, B.Tech EEE B", org:"AVV Coimbatore", date:"'20–'21", cat:"Amrita" },
+/* EXTRACURRICULAR */
+const ec = [
+  { role:"Volunteer", org:"U&I Trust", date:"Aug 2026 – Present", cat:"Current" },
+  { role:"Volunteer", org:"Listeners Army", date:"Jun 2026 – Present", cat:"Current" },
+  { role:"Member — NVIDIA Developer Program", org:"NVIDIA", date:"Apr 2024 – Present", cat:"Current" },
+  { role:"Member — Arm Developer Program", org:"Arm", date:"Mar 2024 – Present", cat:"Current" },
+  { role:"Class Representative — M.Tech. IPA", org:"EED, NIT Calicut", date:"Aug 2024 – Jun 2026", cat:"NIT Calicut" },
+  { role:"Branch Representative — M.Tech. Electrical Engg.", org:"Student Governance Body, NIT Calicut", date:"Oct 2024 – Jun 2026", cat:"NIT Calicut" },
+  { role:"Innovation Ambassador", org:"Institute's Innovation Council, NIT Calicut", date:"Jul 2025 – Jun 2026", cat:"NIT Calicut" },
+  { role:"Student Volunteer", org:"Student Guidance Cell, NIT Calicut", date:"Sep 2025 – May 2026", cat:"NIT Calicut" },
+  { role:"NEP Saarthi (UGC, MoE initiative)", org:"NIT Calicut", date:"Dec 2024 – May 2026", cat:"NIT Calicut" },
+  { role:"Student Council Member", org:"Institute's Innovation Council, NIT Calicut", date:"Jan 2025 – May 2026", cat:"NIT Calicut" },
+  { role:"Student Team Member", org:"Centre for Clean Energy and Circular Economy, NIT Calicut", date:"Jan 2025 – May 2026", cat:"NIT Calicut" },
+  { role:"Designer", org:"IEEE Virtual Speakers Bureau SAC Marketing Team", date:"Aug 2025 – Mar 2026", cat:"IEEE" },
+  { role:"Student Team Member", org:"Centre for Women Welfare and Social Empowerment, NIT Calicut", date:"Jan 2025 – Mar 2026", cat:"NIT Calicut" },
+  { role:"Executive Committee Member", org:"Unnati, Centre for Women Welfare and Social Empowerment", date:"Mar 2025 – Mar 2026", cat:"NIT Calicut" },
+  { role:"Web-Master", org:"IEEE PES SBC, NIT Calicut", date:"Apr 2025 – Mar 2026", cat:"IEEE" },
+  { role:"Treasurer", org:"IEEE PES SBC, NIT Calicut", date:"Mar 2025 – Mar 2026", cat:"IEEE" },
+  { role:"Secretary, GSAC", org:"IEEE PES Kerala Chapter", date:"Mar 2025 – Mar 2026", cat:"IEEE" },
+  { role:"Vice Chair, GSAC", org:"IEEE Robotics and Automation Society Kerala Chapter", date:"Jun 2025 – Mar 2026", cat:"IEEE" },
+  { role:"Designer", org:"IEEE Kerala Chapter GSAC", date:"Jul 2025 – Mar 2026", cat:"IEEE" },
+  { role:"Ambassador", org:"IEEE PES Malabar Hub", date:"Aug 2025 – Feb 2026", cat:"IEEE" },
+  { role:"Student Coordinator", org:"Tinkherhack 4.0 Hackathon, CWSE & NIT Calicut", date:"Feb 2026", cat:"NIT Calicut" },
+  { role:"Student Coordinator", org:"Power and Energy Research Conclave (PERC 2026), NIT Calicut", date:"Oct 2025 – Feb 2026", cat:"NIT Calicut" },
+  { role:"Student Volunteer", org:"1st Annual NITC Alumni Day 2025", date:"Dec 2025", cat:"NIT Calicut" },
+  { role:"Student Volunteer", org:"12th National Power Electronics Conference (NPEC 2025)", date:"Nov – Dec 2025", cat:"NIT Calicut" },
+  { role:"Student Volunteer", org:"ICRAR 2025, CWSE, NIT Calicut", date:"Nov 2025", cat:"NIT Calicut" },
+  { role:"Student Volunteer", org:"WLP 2025, CWSE, NIT Calicut", date:"Nov 2025", cat:"NIT Calicut" },
+  { role:"Student Volunteer", org:"Seminar on Students Wellness, SGC, NIT Calicut", date:"Nov 2025", cat:"NIT Calicut" },
+  { role:"Student Volunteer", org:"Skylight-CWSE, NIT Calicut", date:"Sep 2025", cat:"NIT Calicut" },
+  { role:"Organising Co-Lead", org:"Empower EV Future: PES YP Research Conclave 2025, IEEE PES Kerala Chapter", date:"Apr – Aug 2025", cat:"IEEE" },
+  { role:"Student Volunteer", org:"12 Week Hybrid Lecture Series, Unnati-CWSE, NIT Calicut", date:"Jul – Oct 2025", cat:"NIT Calicut" },
+  { role:"Student Volunteer", org:"Unnati Inaugural Event, CWSE, NIT Calicut", date:"Feb 2025", cat:"NIT Calicut" },
+  { role:"Mentor and Judge", org:"IEEE Hack4Good Hackathon, IEEE SPS Kerala Chapter", date:"Dec 2024", cat:"IEEE" },
+  { role:"Central Coordinator — Cultural Activities", org:"Amrita Vishwa Vidyapeetham", date:"Nov 2023 – May 2024", cat:"Amrita" },
+  { role:"President", org:"Gen-E, Dept. of EEE, Amrita School of Engineering", date:"Jun 2023 – Jun 2024", cat:"Amrita" },
+  { role:"Secretary", org:"INCOSE Amrita Student Chapter", date:"Oct 2022 – May 2024", cat:"Amrita" },
+  { role:"Advisor — WMD Team", org:"Anokha, Amrita University Techfest", date:"Dec 2023 – May 2024", cat:"Amrita" },
+  { role:"Designer — WMD Team", org:"Anokha, Amrita University Techfest", date:"Dec 2023 – May 2024", cat:"Amrita" },
+  { role:"Multimedia Designer", org:"Srishti — The Literary Club of Amrita", date:"Jun 2022 – May 2024", cat:"Amrita" },
+  { role:"Executive Lead", org:"Gen-E (AEEE), Dept. of EEE, Amrita", date:"May 2022 – Jun 2023", cat:"Amrita" },
+  { role:"Graphic Designer", org:"Team Media, AVV Coimbatore", date:"Apr 2022 – May 2024", cat:"Amrita" },
+  { role:"Designer — Elektron Magazine", org:"Gen-E (AEEE), Dept. of EEE, ASE", date:"May 2021 – Jun 2024", cat:"Amrita" },
+  { role:"Multimedia Member", org:"Amritotsavam (2021, 2022, 2023)", date:"2021 – 2023", cat:"Amrita" },
+  { role:"Designer", org:"Gokulashtami (2022, 2023)", date:"2022 – 2023", cat:"Amrita" },
+  { role:"Designer — WMD Team", org:"Anokha, Amrita University Techfest", date:"Mar – Apr 2023", cat:"Amrita" },
+  { role:"Crew Member — Astra REEV", org:"Team Astra", date:"Jun 2022 – Feb 2023", cat:"Amrita" },
+  { role:"Executive Committee Member", org:"Gen-E (AEEE), Dept. of EEE, Amrita", date:"Apr 2021 – May 2022", cat:"Amrita" },
+  { role:"Content Writer", org:"Brainly", date:"Mar – Jun 2021", cat:"Other" },
+  { role:"Class Representative — B.Tech. EEE B", org:"AVV Coimbatore", date:"Oct 2020 – Jul 2021", cat:"Amrita" },
 ];
-const pcCats = ["All", ...new Set(postcards.map(p=>p.cat))];
-const pcFilters = document.getElementById('pcFilters');
-const pcList = document.getElementById('pcList');
-const pcCount = document.getElementById('pcCount');
-let activePcCat='All';
-function renderPostcards(){
-  const q = document.getElementById('pcSearch').value.toLowerCase();
-  const filtered = postcards.filter(p=>{
-    const matchCat = activePcCat==='All' || p.cat===activePcCat;
-    const matchSearch = (p.role+p.org).toLowerCase().includes(q);
+const ecCats = ["All", ...new Set(ec.map(e=>e.cat))];
+const ecFilters = document.getElementById('ecFilters');
+const ecList = document.getElementById('ecList');
+const ecCount = document.getElementById('ecCount');
+let activeCat = 'All';
+function renderEC(){
+  const query = document.getElementById('ecSearch').value.toLowerCase();
+  const filtered = ec.filter(e=>{
+    const matchCat = activeCat==='All' || e.cat===activeCat;
+    const matchSearch = (e.role+e.org).toLowerCase().includes(query);
     return matchCat && matchSearch;
   });
-  pcCount.textContent = `${filtered.length} of ${postcards.length} postcards`;
-  pcList.innerHTML='';
-  filtered.forEach(p=>{
-    const el=document.createElement('div');
-    el.className='postcard-row';
-    el.innerHTML=`<div><div class="pc-role">${p.role}</div><div class="pc-org">${p.org}</div></div><div class="pc-date">${p.date}</div>`;
-    pcList.appendChild(el);
+  ecCount.textContent = `${filtered.length} of ${ec.length} roles`;
+  ecList.innerHTML='';
+  filtered.forEach(e=>{
+    const el = document.createElement('div');
+    el.className='ec-item';
+    el.innerHTML = `<div><div class="ec-role">${e.role}</div><div class="ec-org">${e.org}</div></div><div class="ec-right"><span class="ec-cat">${e.cat}</span><span class="ec-date">${e.date}</span></div>`;
+    ecList.appendChild(el);
   });
 }
-pcCats.forEach(c=>{
-  const b=document.createElement('button');
-  b.className='filter-btn'+(c==='All'?' active':'');
-  b.textContent=c;
-  b.onclick=()=>{ document.querySelectorAll('#pcFilters .filter-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); activePcCat=c; renderPostcards(); };
-  pcFilters.appendChild(b);
+ecCats.forEach(c=>{
+  const btn = document.createElement('button');
+  btn.className='filter-btn'+(c==='All'?' active':'');
+  btn.textContent=c;
+  btn.onclick=()=>{
+    document.querySelectorAll('#ecFilters .filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    activeCat = c;
+    renderEC();
+  };
+  ecFilters.appendChild(btn);
 });
-document.getElementById('pcSearch').addEventListener('input', renderPostcards);
-renderPostcards();
-
-/* CERTS as souvenirs */
-const souvenirs = [
-  { title:"German Language, Level 3 (A+)", issuer:"Vivekananda Institute of Languages", date:"2025" },
-  { title:"Developing IoT Applications", issuer:"Cisco", date:"2024" },
-  { title:"Wireless Technologies for IoT", issuer:"Cisco", date:"2024" },
-  { title:"Blockchain and the Internet of Things", issuer:"Cisco", date:"2024" },
-  { title:"Grid Automation & Distribution Protection", issuer:"Tata Power-DDL", date:"2023" },
-  { title:"Electric Industry Operations and Markets", issuer:"Coursera", date:"2023" },
-  { title:"Energy Literacy Training", issuer:"Energy Swaraj Foundation", date:"2022" },
-  { title:"Intro to Augmented Reality & AR Core", issuer:"Coursera", date:"2021" },
-  { title:"Programming for Everyone (Python)", issuer:"Coursera", date:"2021" },
-  { title:"Graphic Design", issuer:"Coursera", date:"2021" },
-];
-const souvenirGrid = document.getElementById('souvenirGrid');
-souvenirs.forEach(s=>{
-  const el=document.createElement('div');
-  el.className='souvenir';
-  el.innerHTML=`<div class="souvenir-issuer">${s.issuer}</div><div class="souvenir-title">${s.title}</div><div class="souvenir-date">${s.date}</div>`;
-  souvenirGrid.appendChild(el);
-});
+document.getElementById('ecSearch').addEventListener('input', renderEC);
+renderEC();
 </script>
 
 </body>
