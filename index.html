@@ -3,318 +3,330 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Sri Ram Gupta — Portfolio</title>
+<title>Field Ledger</title>
 <style>
   :root{
-    --bg:#0b0b0d;
-    --surface:#141417;
-    --surface-2:#1a1a1e;
-    --border:#242428;
-    --text:#e8e8ea;
-    --muted:#8c8c92;
-    --accent:#7fd9c4;
-    --radius:10px;
-    --sans:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+    --bg:#0e0d0b;
+    --page:#15130f;
+    --page-2:#1b1812;
+    --line:#2a2520;
+    --ink:#c9c2b0;
+    --ink-dim:#817a6c;
+    --stamp:#b97b4a;
+    --serif:'Georgia','Times New Roman',serif;
+    --mono:'Courier New',monospace;
   }
   *{ margin:0; padding:0; box-sizing:border-box; }
-  html{ scroll-behavior:smooth; }
+  html,body{ background:var(--bg); color:var(--ink); font-family:var(--serif); min-height:100vh; }
   body{
-    background:var(--bg); color:var(--text); font-family:var(--sans);
-    line-height:1.6; -webkit-font-smoothing:antialiased;
+    display:flex;
+    background-image:
+      radial-gradient(ellipse at top left, rgba(185,123,74,0.04), transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(185,123,74,0.03), transparent 50%);
   }
-  ::selection{ background:var(--accent); color:#000; }
-  a{ color:inherit; }
+  ::selection{ background:var(--stamp); color:#0e0d0b; }
 
-  /* ===== TOP NAV ===== */
-  header.top{
-    position:sticky; top:0; z-index:50;
-    background:rgba(11,11,13,0.9); backdrop-filter:blur(10px);
-    border-bottom:1px solid var(--border);
+  /* ===== SPINE (left index) ===== */
+  .spine{
+    width:210px; flex-shrink:0; background:var(--page);
+    border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0;
+    display:flex; flex-direction:column; z-index:20;
   }
-  .nav-inner{
-    max-width:880px; margin:0 auto; padding:14px 20px;
-    display:flex; justify-content:space-between; align-items:center; gap:12px;
+  .spine-head{ padding:28px 22px 18px; border-bottom:1px solid var(--line); }
+  .spine-head .mark{ font-family:var(--mono); font-size:0.62rem; color:var(--stamp); letter-spacing:2px; }
+  .spine-head .title{ font-size:1.05rem; margin-top:8px; letter-spacing:0.3px; }
+  .spine-head .sub{ font-family:var(--mono); font-size:0.6rem; color:var(--ink-dim); margin-top:6px; letter-spacing:0.5px; }
+
+  .spine-list{ flex:1; overflow-y:auto; padding:10px 0; }
+  .spine-item{
+    display:flex; align-items:baseline; gap:10px; padding:11px 22px;
+    cursor:pointer; color:var(--ink-dim); font-size:0.78rem; letter-spacing:0.3px;
+    border-left:2px solid transparent; transition:all .2s;
   }
-  .brand{ font-weight:600; font-size:0.95rem; letter-spacing:-0.2px; }
-  .brand span{ color:var(--accent); }
-  nav.links{ display:flex; gap:4px; overflow-x:auto; scrollbar-width:none; }
-  nav.links::-webkit-scrollbar{ display:none; }
-  nav.links a{
-    font-size:0.78rem; color:var(--muted); text-decoration:none; padding:7px 12px;
-    border-radius:20px; white-space:nowrap; transition:all .2s;
+  .spine-item .no{ font-family:var(--mono); font-size:0.65rem; color:var(--ink-dim); }
+  .spine-item:hover{ color:var(--ink); background:var(--page-2); }
+  .spine-item.active{ color:var(--ink); border-left-color:var(--stamp); background:var(--page-2); }
+  .spine-item.active .no{ color:var(--stamp); }
+
+  .spine-foot{ padding:16px 22px; border-top:1px solid var(--line); font-family:var(--mono); font-size:0.58rem; color:var(--ink-dim); letter-spacing:0.5px; }
+
+  /* ===== MAIN PAGE AREA ===== */
+  .page-wrap{ margin-left:210px; width:100%; min-height:100vh; position:relative; z-index:1; }
+  .page{
+    max-width:720px; margin:0 auto; padding:60px 36px 90px;
+    display:none; animation:fadein .4s ease;
   }
-  nav.links a:hover, nav.links a.active{ background:var(--surface); color:var(--text); }
+  .page.active{ display:block; }
+  @keyframes fadein{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
 
-  /* ===== LAYOUT ===== */
-  main{ max-width:880px; margin:0 auto; padding:0 20px 60px; }
+  .entry-head{ margin-bottom:34px; padding-bottom:18px; border-bottom:1px double var(--line); }
+  .entry-no{ font-family:var(--mono); font-size:0.68rem; color:var(--stamp); letter-spacing:2px; }
+  .entry-title{ font-size:1.6rem; margin-top:8px; letter-spacing:0.3px; }
+  .entry-note{ color:var(--ink-dim); font-size:0.85rem; margin-top:10px; line-height:1.7; max-width:560px; font-family:var(--mono); }
 
-  /* ===== HERO ===== */
-  .hero{ padding:56px 0 36px; border-bottom:1px solid var(--border); }
-  .hero-eyebrow{ font-size:0.78rem; color:var(--accent); margin-bottom:10px; font-weight:500; }
-  .hero h1{ font-size:clamp(1.8rem,5vw,2.6rem); font-weight:700; letter-spacing:-0.5px; margin-bottom:14px; }
-  .hero p{ color:var(--muted); max-width:560px; font-size:0.94rem; }
-  .hero-actions{ display:flex; gap:10px; margin-top:24px; flex-wrap:wrap; }
-  .btn{
-    font-size:0.82rem; padding:9px 18px; border-radius:8px; border:1px solid var(--border);
-    text-decoration:none; color:var(--text); transition:all .2s; display:inline-block;
-  }
-  .btn:hover{ border-color:var(--accent); color:var(--accent); }
-  .btn.primary{ background:var(--accent); color:#0b0b0d; border-color:var(--accent); font-weight:600; }
-  .btn.primary:hover{ opacity:0.88; color:#0b0b0d; }
+  /* ===== OVERVIEW PAGE ===== */
+  .overview-text{ font-size:0.98rem; line-height:1.9; color:var(--ink); max-width:560px; }
+  .overview-text + .overview-text{ margin-top:16px; }
+  .field-table{ margin-top:30px; border-top:1px solid var(--line); }
+  .field-row{ display:flex; justify-content:space-between; gap:20px; padding:12px 0; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:0.78rem; }
+  .field-row .k{ color:var(--ink-dim); letter-spacing:0.5px; }
+  .field-row .v{ color:var(--ink); text-align:right; }
 
-  .stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; margin-top:32px; background:var(--border); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
-  .stat{ background:var(--surface); padding:14px 10px; text-align:center; }
-  .stat .val{ font-size:1.25rem; font-weight:700; }
-  .stat .lbl{ font-size:0.62rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.4px; margin-top:3px; }
+  /* ===== SKILLS ===== */
+  .skill-block{ margin-bottom:26px; }
+  .skill-label{ font-family:var(--mono); font-size:0.68rem; color:var(--stamp); letter-spacing:1.5px; margin-bottom:10px; }
+  .skill-tags{ display:flex; flex-wrap:wrap; gap:8px; }
+  .tag{ font-family:var(--mono); font-size:0.75rem; padding:5px 11px; border:1px solid var(--line); color:var(--ink); border-radius:2px; }
 
-  /* ===== MODULAR COLLAPSIBLE SECTIONS ===== */
-  details.section{
-    border-bottom:1px solid var(--border);
-  }
-  details.section summary{
-    list-style:none; cursor:pointer; padding:22px 0; display:flex;
-    justify-content:space-between; align-items:center; user-select:none;
-  }
-  details.section summary::-webkit-details-marker{ display:none; }
-  .sec-title{ font-size:1.05rem; font-weight:600; letter-spacing:-0.2px; }
-  .sec-sub{ font-size:0.78rem; color:var(--muted); margin-top:3px; }
-  .chevron{ color:var(--muted); font-size:0.85rem; transition:transform .25s; flex-shrink:0; margin-left:12px; }
-  details[open] .chevron{ transform:rotate(180deg); }
-  .sec-body{ padding-bottom:28px; }
-
-  /* ===== GENERIC CARDS ===== */
-  .grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
-  .card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
-  .card h4{ font-size:0.68rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; font-weight:600; }
-  .chip-row{ display:flex; flex-wrap:wrap; gap:6px; }
-  .chip{ font-size:0.72rem; padding:5px 10px; border:1px solid var(--border); border-radius:16px; color:var(--text); }
-
-  /* ===== PROJECTS ===== */
-  .proj{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; margin-bottom:8px; cursor:pointer; transition:border-color .2s; }
-  .proj:hover{ border-color:#3a3a40; }
-  .proj-top{ display:flex; justify-content:space-between; gap:14px; align-items:center; }
-  .proj-title{ font-size:0.92rem; font-weight:600; }
-  .proj-date{ font-size:0.68rem; color:var(--muted); white-space:nowrap; }
-  .proj-arrow{ color:var(--accent); font-size:0.85rem; transition:transform .25s; flex-shrink:0; }
-  .proj.open .proj-arrow{ transform:rotate(45deg); }
-  .proj-desc{ color:var(--muted); font-size:0.82rem; max-height:0; opacity:0; overflow:hidden; transition:all .3s; }
-  .proj.open .proj-desc{ max-height:220px; opacity:1; margin-top:10px; }
+  /* ===== PROJECTS as case files ===== */
+  .case{ border-bottom:1px solid var(--line); padding:16px 0; cursor:pointer; }
+  .case-top{ display:flex; justify-content:space-between; gap:16px; align-items:baseline; }
+  .case-title{ font-size:0.98rem; }
+  .case-date{ font-family:var(--mono); font-size:0.66rem; color:var(--ink-dim); white-space:nowrap; }
+  .case-mark{ font-family:var(--mono); color:var(--stamp); font-size:0.75rem; margin-right:8px; }
+  .case-body{ max-height:0; opacity:0; overflow:hidden; transition:all .3s; font-size:0.85rem; color:var(--ink-dim); line-height:1.7; }
+  .case.open .case-body{ max-height:200px; opacity:1; margin-top:10px; }
 
   /* ===== TIMELINE ===== */
-  .tl{ border-left:1px solid var(--border); padding-left:22px; }
-  .tl-item{ margin-bottom:24px; position:relative; }
-  .tl-item::before{ content:''; position:absolute; left:-27px; top:3px; width:8px; height:8px; border-radius:50%; background:var(--bg); border:2px solid var(--accent); }
-  .tl-date{ font-size:0.68rem; color:var(--accent); margin-bottom:3px; }
-  .tl-role{ font-weight:600; font-size:0.9rem; }
-  .tl-org{ color:var(--muted); font-size:0.78rem; margin-top:2px; }
+  .tl-row{ display:flex; gap:20px; padding:16px 0; border-bottom:1px solid var(--line); }
+  .tl-date{ font-family:var(--mono); font-size:0.68rem; color:var(--stamp); width:140px; flex-shrink:0; padding-top:2px; }
+  .tl-role{ font-size:0.92rem; }
+  .tl-org{ font-size:0.78rem; color:var(--ink-dim); margin-top:3px; font-family:var(--mono); }
 
-  /* ===== FILTERS / SEARCH ===== */
-  .filter-bar{ display:flex; gap:7px; flex-wrap:wrap; margin-bottom:18px; }
-  .filter-btn{
-    font-size:0.72rem; padding:6px 13px; border-radius:16px; border:1px solid var(--border);
-    background:transparent; color:var(--muted); cursor:pointer; transition:all .2s; font-family:var(--sans);
+  /* ===== CERTS / list style ===== */
+  .plain-list{ display:flex; flex-direction:column; }
+  .plain-row{ display:flex; justify-content:space-between; gap:16px; padding:13px 0; border-bottom:1px solid var(--line); align-items:baseline; }
+  .plain-main .t{ font-size:0.88rem; }
+  .plain-main .s{ font-family:var(--mono); font-size:0.68rem; color:var(--stamp); margin-top:3px; }
+  .plain-date{ font-family:var(--mono); font-size:0.68rem; color:var(--ink-dim); white-space:nowrap; }
+
+  /* ===== ACHIEVEMENTS filterable ===== */
+  .stamp-filter{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:22px; }
+  .stamp-btn{
+    font-family:var(--mono); font-size:0.68rem; padding:6px 12px; border:1px solid var(--line);
+    background:transparent; color:var(--ink-dim); cursor:pointer; transition:all .2s; letter-spacing:0.5px;
   }
-  .filter-btn:hover{ color:var(--text); }
-  .filter-btn.active{ background:var(--accent); color:#0b0b0d; border-color:var(--accent); }
-  .search-box{
-    width:100%; max-width:320px; padding:9px 13px; background:var(--surface-2); border:1px solid var(--border);
-    border-radius:8px; color:var(--text); font-family:var(--sans); font-size:0.8rem; margin-bottom:18px;
+  .stamp-btn:hover{ color:var(--ink); }
+  .stamp-btn.active{ color:var(--stamp); border-color:var(--stamp); }
+  .ach-row{ padding:13px 0; border-bottom:1px solid var(--line); }
+  .ach-tag{ font-family:var(--mono); font-size:0.6rem; color:var(--stamp); letter-spacing:0.8px; }
+  .ach-title{ font-size:0.88rem; margin:6px 0 3px; }
+  .ach-org{ font-family:var(--mono); font-size:0.7rem; color:var(--ink-dim); }
+
+  /* ===== ACTIVITIES searchable ===== */
+  .search-row{ margin-bottom:18px; }
+  .search-row input{
+    width:100%; max-width:320px; background:var(--page-2); border:1px solid var(--line);
+    color:var(--ink); font-family:var(--mono); font-size:0.78rem; padding:9px 12px;
   }
-  .search-box::placeholder{ color:var(--muted); }
-  .search-box:focus{ outline:none; border-color:var(--accent); }
-
-  /* ===== ACHIEVEMENTS ===== */
-  .ach-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px; }
-  .ach-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; }
-  .ach-tag{ font-size:0.62rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.4px; }
-  .ach-title{ font-weight:600; font-size:0.85rem; margin:7px 0 4px; }
-  .ach-org{ font-size:0.72rem; color:var(--muted); }
-
-  /* ===== ACTIVITIES LIST ===== */
-  .ec-list{ display:flex; flex-direction:column; gap:1px; background:var(--border); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
-  .ec-item{ background:var(--surface); padding:13px 16px; display:flex; justify-content:space-between; gap:16px; align-items:center; flex-wrap:wrap; transition:background .2s; }
-  .ec-item:hover{ background:var(--surface-2); }
-  .ec-role{ font-size:0.84rem; font-weight:600; }
-  .ec-org{ font-size:0.74rem; color:var(--muted); }
-  .ec-right{ display:flex; align-items:center; gap:12px; }
-  .ec-date{ font-size:0.68rem; color:var(--accent); white-space:nowrap; }
-  .ec-cat{ font-size:0.6rem; padding:3px 8px; border-radius:10px; background:var(--surface-2); color:var(--muted); border:1px solid var(--border); }
-  .ec-count{ font-size:0.74rem; color:var(--muted); margin-bottom:14px; }
+  .search-row input::placeholder{ color:var(--ink-dim); }
+  .search-row input:focus{ outline:none; border-color:var(--stamp); }
+  .count-note{ font-family:var(--mono); font-size:0.68rem; color:var(--ink-dim); margin-bottom:16px; }
+  .act-row{ display:flex; justify-content:space-between; gap:16px; padding:12px 0; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .act-role{ font-size:0.85rem; }
+  .act-org{ font-family:var(--mono); font-size:0.68rem; color:var(--ink-dim); }
+  .act-right{ display:flex; gap:12px; align-items:center; }
+  .act-cat{ font-family:var(--mono); font-size:0.58rem; color:var(--stamp); border:1px solid var(--line); padding:3px 8px; }
+  .act-date{ font-family:var(--mono); font-size:0.65rem; color:var(--ink-dim); white-space:nowrap; }
 
   /* ===== LANGUAGES ===== */
-  .lang-card{ display:flex; align-items:center; gap:18px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px; flex-wrap:wrap; }
-  .lang-bars{ display:flex; gap:5px; }
-  .lang-level{ width:24px; height:8px; border-radius:2px; background:var(--border); }
-  .lang-level.filled{ background:var(--accent); }
+  .lang-row{ padding:14px 0; }
+  .lang-name{ font-size:0.92rem; }
+  .lang-meta{ font-family:var(--mono); font-size:0.7rem; color:var(--ink-dim); margin-top:6px; }
+  .lang-marks{ display:flex; gap:4px; margin-top:10px; }
+  .mark-box{ width:20px; height:6px; background:var(--line); }
+  .mark-box.on{ background:var(--stamp); }
 
-  /* ===== CERTIFICATIONS ===== */
-  .cert-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; }
-  .cert-issuer{ font-size:0.64rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.4px; }
-  .cert-title{ font-weight:600; font-size:0.84rem; margin:6px 0 3px; }
-  .cert-date{ font-size:0.68rem; color:var(--muted); }
+  /* ===== NOTE / CONTACT ===== */
+  .note-box{ font-size:0.9rem; line-height:1.9; color:var(--ink-dim); max-width:520px; }
+  .note-box .signature{ margin-top:30px; font-family:var(--mono); font-size:0.7rem; color:var(--stamp); letter-spacing:1px; }
 
-  /* ===== CONTACT (no personal details — placeholders only) ===== */
-  .contact-box{ padding:40px 0; text-align:center; }
-  .contact-box p{ color:var(--muted); font-size:0.88rem; max-width:420px; margin:0 auto 20px; }
-  .contact-links{ display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+  footer.ledger-foot{ font-family:var(--mono); font-size:0.6rem; color:var(--ink-dim); padding:30px 36px; border-top:1px solid var(--line); max-width:720px; margin:0 auto; }
 
-  footer{ text-align:center; padding:26px 20px; color:var(--muted); font-size:0.68rem; border-top:1px solid var(--border); }
-
-  @media(max-width:600px){
-    .stat-row{ grid-template-columns:repeat(2,1fr); }
-    nav.links{ justify-content:flex-start; }
+  @media(max-width:860px){
+    .spine{ position:static; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--line); flex-direction:row; }
+    .spine-head{ display:none; }
+    .spine-list{ display:flex; overflow-x:auto; padding:8px; }
+    .spine-item{ border-left:none; border-bottom:2px solid transparent; white-space:nowrap; padding:10px 14px; }
+    .spine-item.active{ border-left:none; border-bottom-color:var(--stamp); }
+    .spine-foot{ display:none; }
+    .page-wrap{ margin-left:0; }
+    .tl-row{ flex-direction:column; gap:4px; }
+    .tl-date{ width:auto; }
   }
 </style>
 </head>
 <body>
 
-<header class="top">
-  <div class="nav-inner">
-    <div class="brand">Sri Ram <span>Gupta</span></div>
-    <nav class="links" id="navLinks">
-      <a href="#overview" class="active">Overview</a>
-      <a href="#skills">Skills</a>
-      <a href="#projects">Projects</a>
-      <a href="#experience">Experience</a>
-      <a href="#certs">Certs</a>
-      <a href="#achievements">Achievements</a>
-      <a href="#extracurricular">Activities</a>
-      <a href="#languages">Languages</a>
-      <a href="#contact">Contact</a>
-    </nav>
+<div class="spine">
+  <div class="spine-head">
+    <div class="mark">FIELD LEDGER</div>
+    <div class="title">M. Sri Ram Gupta</div>
+    <div class="sub">RECORD MAINTAINED SINCE 2020</div>
   </div>
-</header>
+  <div class="spine-list" id="spineList">
+    <div class="spine-item active" data-page="overview"><span class="no">01</span> Overview</div>
+    <div class="spine-item" data-page="skills"><span class="no">02</span> Skills</div>
+    <div class="spine-item" data-page="projects"><span class="no">03</span> Projects</div>
+    <div class="spine-item" data-page="experience"><span class="no">04</span> Experience</div>
+    <div class="spine-item" data-page="certs"><span class="no">05</span> Certifications</div>
+    <div class="spine-item" data-page="achievements"><span class="no">06</span> Achievements</div>
+    <div class="spine-item" data-page="activities"><span class="no">07</span> Activities</div>
+    <div class="spine-item" data-page="languages"><span class="no">08</span> Languages</div>
+    <div class="spine-item" data-page="note"><span class="no">09</span> Note</div>
+  </div>
+  <div class="spine-foot">PAGE RENDERED LOCALLY<br/>NO EXTERNAL CALLS MADE</div>
+</div>
 
-<main>
+<div class="page-wrap">
 
-  <section id="overview" class="hero">
-    <div class="hero-eyebrow">Electrical · Robotics · Power Systems</div>
-    <h1>Maddula Sri Ram Gupta</h1>
-    <p>
-      Edison Engineer at GE Vernova — Gas Power Engineering, Controls Platform Software Development.
-      M.Tech in Industrial Power & Automation from NIT Calicut. I build control systems, autonomous
-      multi-robot architectures, and the occasional overcomplicated side project.
-    </p>
-    <div class="hero-actions">
-      <a href="#projects" class="btn primary">View Projects</a>
-      <a href="#contact" class="btn">Get in Touch</a>
+  <section class="page active" id="page-overview">
+    <div class="entry-head">
+      <div class="entry-no">ENTRY NO. 01</div>
+      <div class="entry-title">Overview</div>
     </div>
-    <div class="stat-row">
-      <div class="stat"><div class="val">9.88</div><div class="lbl">M.Tech CGPA</div></div>
-      <div class="stat"><div class="val">2</div><div class="lbl">Gold Medals</div></div>
-      <div class="stat"><div class="val">15+</div><div class="lbl">Awards</div></div>
-      <div class="stat"><div class="val">40+</div><div class="lbl">Roles Held</div></div>
-    </div>
-  </section>
-
-  <details class="section" id="skills">
-    <summary><div><div class="sec-title">Skills</div><div class="sec-sub">Languages, tools, and platforms</div></div><span class="chevron">⌄</span></summary>
-    <div class="sec-body">
-      <div class="grid">
-        <div class="card"><h4>Languages</h4><div class="chip-row"><div class="chip">C</div><div class="chip">C#</div><div class="chip">Python</div></div></div>
-        <div class="card"><h4>Tools</h4><div class="chip-row"><div class="chip">MATLAB</div><div class="chip">LabVIEW</div><div class="chip">ROS2</div><div class="chip">Gazebo</div></div></div>
-        <div class="card"><h4>Platforms</h4><div class="chip-row"><div class="chip">Arduino</div><div class="chip">RPi</div><div class="chip">Pico</div><div class="chip">ESP8266</div><div class="chip">ESP32</div><div class="chip">Ubuntu</div></div></div>
-        <div class="card"><h4>Programs</h4><div class="chip-row"><div class="chip">NVIDIA Developer</div><div class="chip">Arm Developer</div></div></div>
-      </div>
-    </div>
-  </details>
-
-  <details class="section" id="projects">
-    <summary><div><div class="sec-title">Projects</div><div class="sec-sub">Tap a project to expand</div></div><span class="chevron">⌄</span></summary>
-    <div class="sec-body"><div id="projectList"></div></div>
-  </details>
-
-  <details class="section" id="experience">
-    <summary><div><div class="sec-title">Experience & Education</div><div class="sec-sub">Timeline</div></div><span class="chevron">⌄</span></summary>
-    <div class="sec-body"><div class="tl" id="timeline"></div></div>
-  </details>
-
-  <details class="section" id="certs">
-    <summary><div><div class="sec-title">Certifications</div></div><span class="chevron">⌄</span></summary>
-    <div class="sec-body"><div class="grid" id="certGrid"></div></div>
-  </details>
-
-  <details class="section" id="achievements">
-    <summary><div><div class="sec-title">Achievements</div></div><span class="chevron">⌄</span></summary>
-    <div class="sec-body">
-      <div class="filter-bar" id="achFilters"></div>
-      <div class="ach-grid" id="achGrid"></div>
-    </div>
-  </details>
-
-  <details class="section" id="extracurricular">
-    <summary><div><div class="sec-title">Activities Log</div><div class="sec-sub">40+ roles — filter or search</div></div><span class="chevron">⌄</span></summary>
-    <div class="sec-body">
-      <input type="text" class="search-box" id="ecSearch" placeholder="Search roles, organizations..." />
-      <div class="filter-bar" id="ecFilters"></div>
-      <div class="ec-count" id="ecCount"></div>
-      <div class="ec-list" id="ecList"></div>
-    </div>
-  </details>
-
-  <details class="section" id="languages">
-    <summary><div><div class="sec-title">Languages</div></div><span class="chevron">⌄</span></summary>
-    <div class="sec-body">
-      <div class="lang-card">
-        <div style="flex:1; min-width:200px;">
-          <div style="font-weight:600;">German — Level 3 (Advanced)</div>
-          <div style="color:var(--muted); font-size:0.76rem; margin-top:4px;">Vivekananda Institute of Languages, Ramakrishna Math, Hyderabad · Jun–Apr 2025</div>
-          <div style="color:var(--muted); font-size:0.7rem; margin-top:2px;">Grades: Level 1 – A+ · Level 2 – A+ · Level 3 – A+ (latest)</div>
-        </div>
-        <div class="lang-bars">
-          <div class="lang-level filled"></div><div class="lang-level filled"></div><div class="lang-level filled"></div>
-        </div>
-      </div>
-    </div>
-  </details>
-
-  <section id="contact" class="contact-box">
-    <div class="sec-title" style="margin-bottom:10px;">Contact</div>
-    <p>Reach out via the channels of your choice — add your preferred email, LinkedIn, or GitHub links here.</p>
-    <div class="contact-links">
-      <a href="#" class="btn">Email</a>
-      <a href="#" class="btn">LinkedIn</a>
-      <a href="#" class="btn">GitHub</a>
+    <p class="overview-text">Edison Engineer at GE Vernova, working on Gas Power Engineering and controls platform software.</p>
+    <p class="overview-text">Completed an M.Tech in Industrial Power & Automation at NIT Calicut. Spends time on control systems, multi-robot coordination, and the occasional side project that grows larger than intended.</p>
+    <div class="field-table">
+      <div class="field-row"><div class="k">CURRENT ROLE</div><div class="v">Edison Engineer, GE Vernova</div></div>
+      <div class="field-row"><div class="k">EDUCATION</div><div class="v">M.Tech — NIT Calicut</div></div>
+      <div class="field-row"><div class="k">FOUNDATION</div><div class="v">B.Tech — Amrita Vishwa Vidyapeetham</div></div>
+      <div class="field-row"><div class="k">FOCUS AREAS</div><div class="v">Controls · Robotics · Power Systems</div></div>
     </div>
   </section>
 
-  <footer>© <span id="year"></span> Maddula Sri Ram Gupta — Built from scratch.</footer>
-</main>
+  <section class="page" id="page-skills">
+    <div class="entry-head">
+      <div class="entry-no">ENTRY NO. 02</div>
+      <div class="entry-title">Skills</div>
+      <div class="entry-note">Working knowledge, listed plainly.</div>
+    </div>
+    <div class="skill-block">
+      <div class="skill-label">LANGUAGES</div>
+      <div class="skill-tags"><div class="tag">C</div><div class="tag">C#</div><div class="tag">Python</div></div>
+    </div>
+    <div class="skill-block">
+      <div class="skill-label">TOOLS</div>
+      <div class="skill-tags"><div class="tag">MATLAB</div><div class="tag">LabVIEW</div><div class="tag">ROS2</div><div class="tag">Gazebo</div></div>
+    </div>
+    <div class="skill-block">
+      <div class="skill-label">PLATFORMS</div>
+      <div class="skill-tags"><div class="tag">Arduino</div><div class="tag">Raspberry Pi</div><div class="tag">Pico</div><div class="tag">ESP8266</div><div class="tag">ESP32</div><div class="tag">Ubuntu</div></div>
+    </div>
+    <div class="skill-block">
+      <div class="skill-label">PROGRAMS</div>
+      <div class="skill-tags"><div class="tag">NVIDIA Developer</div><div class="tag">Arm Developer</div></div>
+    </div>
+  </section>
+
+  <section class="page" id="page-projects">
+    <div class="entry-head">
+      <div class="entry-no">ENTRY NO. 03</div>
+      <div class="entry-title">Projects</div>
+      <div class="entry-note">Open a case file for notes.</div>
+    </div>
+    <div id="caseList"></div>
+  </section>
+
+  <section class="page" id="page-experience">
+    <div class="entry-head">
+      <div class="entry-no">ENTRY NO. 04</div>
+      <div class="entry-title">Experience & Education</div>
+    </div>
+    <div id="tlList"></div>
+  </section>
+
+  <section class="page" id="page-certs">
+    <div class="entry-head">
+      <div class="entry-no">ENTRY NO. 05</div>
+      <div class="entry-title">Certifications</div>
+    </div>
+    <div class="plain-list" id="certList"></div>
+  </section>
+
+  <section class="page" id="page-achievements">
+    <div class="entry-head">
+      <div class="entry-no">ENTRY NO. 06</div>
+      <div class="entry-title">Achievements</div>
+      <div class="entry-note">Filed by category, not by importance.</div>
+    </div>
+    <div class="stamp-filter" id="achFilters"></div>
+    <div id="achList"></div>
+  </section>
+
+  <section class="page" id="page-activities">
+    <div class="entry-head">
+      <div class="entry-no">ENTRY NO. 07</div>
+      <div class="entry-title">Activities</div>
+      <div class="entry-note">Roles across institutes and chapters over the years.</div>
+    </div>
+    <div class="search-row"><input type="text" id="actSearch" placeholder="search entries..." /></div>
+    <div class="stamp-filter" id="actFilters"></div>
+    <div class="count-note" id="actCount"></div>
+    <div id="actList"></div>
+  </section>
+
+  <section class="page" id="page-languages">
+    <div class="entry-head">
+      <div class="entry-no">ENTRY NO. 08</div>
+      <div class="entry-title">Languages</div>
+    </div>
+    <div class="lang-row">
+      <div class="lang-name">German — Level 3, Advanced</div>
+      <div class="lang-meta">Vivekananda Institute of Languages, Ramakrishna Math, Hyderabad · Jun 2024 – Apr 2025</div>
+      <div class="lang-meta">Grades: Level 1 — A+ · Level 2 — A+ · Level 3 — A+</div>
+      <div class="lang-marks"><div class="mark-box on"></div><div class="mark-box on"></div><div class="mark-box on"></div></div>
+    </div>
+  </section>
+
+  <section class="page" id="page-note">
+    <div class="entry-head">
+      <div class="entry-no">ENTRY NO. 09</div>
+      <div class="entry-title">Note</div>
+    </div>
+    <p class="note-box">This ledger is kept as a record, not a pitch. If you'd like to get in touch, add your preferred contact method where it makes sense for you — this page intentionally leaves no personal details on display.</p>
+    <div class="signature">— END OF RECORD —</div>
+  </section>
+
+  <footer class="ledger-foot">LAST ENTRY FILED <span id="yr"></span> · KEPT PLAIN, ON PURPOSE</footer>
+</div>
 
 <script>
-document.getElementById('year').textContent = new Date().getFullYear();
+document.getElementById('yr').textContent = new Date().getFullYear();
 
-/* Active nav highlight on scroll */
-const sections = document.querySelectorAll('main > section, main > details');
-const navLinks = document.querySelectorAll('#navLinks a');
-window.addEventListener('scroll', ()=>{
-  let current = sections[0].id;
-  sections.forEach(s=>{ if(window.scrollY >= s.offsetTop - 160) current = s.id; });
-  navLinks.forEach(a=>{
-    a.classList.toggle('active', a.getAttribute('href') === '#'+current);
+/* Page switching */
+const spineItems = document.querySelectorAll('.spine-item');
+const pages = document.querySelectorAll('.page');
+spineItems.forEach(item=>{
+  item.addEventListener('click', ()=>{
+    spineItems.forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+    const target = item.getAttribute('data-page');
+    pages.forEach(p=> p.classList.toggle('active', p.id === 'page-'+target));
+    window.scrollTo({top:0, behavior:'smooth'});
   });
 });
 
-/* PROJECTS */
+/* PROJECTS as case files */
 const projects = [
-  { title:"Adaptive Heterogeneous Multi-Robot Coordination and Control", date:"Jan 2025 – Jun 2026", desc:"M.Tech Major Project — Leader-follower coordination strategy for two heterogeneous mobile robots, handling system uncertainties in multi-robot missions." },
-  { title:"AI-Enabled Safety Interlock System for Two-Wheelers", date:"Jan 2026 – Feb 2026", desc:"Qualcomm & Arduino 'AI for All' challenge entry — CV-based helmet detection on Arduino UNO Q, blocking ignition if rider isn't wearing a helmet." },
-  { title:"Color-based Object Sorting System", date:"Apr 2025 – May 2025", desc:"Automated classification using a color sensor to sort objects into corresponding containers for industrial use." },
+  { title:"Adaptive Heterogeneous Multi-Robot Coordination and Control", date:"Jan 2025 – Jun 2026", desc:"M.Tech major project — leader-follower coordination strategy for two heterogeneous mobile robots, handling system uncertainties in multi-robot missions." },
+  { title:"AI-Enabled Safety Interlock System for Two-Wheelers", date:"Jan 2026 – Feb 2026", desc:"Qualcomm & Arduino 'AI for All' challenge entry — CV-based helmet detection on Arduino UNO Q, blocking ignition if a rider isn't wearing a helmet." },
+  { title:"Color-based Object Sorting System", date:"Apr 2025 – May 2025", desc:"Automated classification using a color sensor to sort objects into corresponding containers." },
   { title:"Smart Residential Energy Management", date:"Nov 2024 – Dec 2024", desc:"App-controlled load shedding with real-time source switching and backup time estimation." },
   { title:"Preliminary Energy Audit — Morbido Vinyl Pvt. Ltd.", date:"Nov 2024", desc:"Energy audit of a footwear manufacturing facility (9,200 pairs/day) to identify efficiency gains." },
-  { title:"SCADA for a Smart Microgrid", date:"Sep 2023 – May 2024", desc:"B.Tech Major Project — SCADA implementation with real-time monitoring and predictive energy management." },
-  { title:"Overload Protection of Induction Motor", date:"Oct 2023 – Nov 2023", desc:"NodeMCU ESP8266 + cloud app for monitoring and protecting single-phase induction motors." },
+  { title:"SCADA for a Smart Microgrid", date:"Sep 2023 – May 2024", desc:"B.Tech major project — SCADA implementation with real-time monitoring and predictive energy management." },
+  { title:"Overload Protection of Induction Motor", date:"Oct 2023 – Nov 2023", desc:"NodeMCU ESP8266 and cloud app for monitoring and protecting single-phase induction motors." },
   { title:"Smart Irrigation System", date:"Mar 2023 – May 2023", desc:"IoT-based automated irrigation using NodeMCU ESP8266 to reduce water wastage." },
   { title:"Color Sense Bot", date:"Apr 2023 – May 2023", desc:"3-wheel robot using PIC16F877A and TCS3200 sensor, responding to color cards." },
   { title:"Live-in-Labs: Infrastructure at Dalapur, UP", date:"Feb 2023 – Aug 2023", desc:"Rural development initiative using Participatory Rural Appraisal (PRA) tools." },
 ];
-const projectList = document.getElementById('projectList');
+const caseList = document.getElementById('caseList');
 projects.forEach(p=>{
   const el = document.createElement('div');
-  el.className='proj';
-  el.innerHTML = `<div class="proj-top"><div class="proj-title">${p.title}</div><div style="display:flex;align-items:center;gap:12px;"><div class="proj-date">${p.date}</div><div class="proj-arrow">+</div></div></div><div class="proj-desc">${p.desc}</div>`;
+  el.className='case';
+  el.innerHTML = `<div class="case-top"><div class="case-title"><span class="case-mark">+</span>${p.title}</div><div class="case-date">${p.date}</div></div><div class="case-body">${p.desc}</div>`;
   el.addEventListener('click', ()=> el.classList.toggle('open'));
-  projectList.appendChild(el);
+  caseList.appendChild(el);
 });
 
 /* TIMELINE */
@@ -325,12 +337,12 @@ const timelineData = [
   { date:"Jun 2020", role:"Higher Secondary Certificate", org:"FIITJEE Junior College, Hyderabad · 91.4%" },
   { date:"May 2018", role:"Secondary School Certificate", org:"St. Joseph's School, Hyderabad · 87%" },
 ];
-const timelineEl = document.getElementById('timeline');
+const tlList = document.getElementById('tlList');
 timelineData.forEach(t=>{
   const el = document.createElement('div');
-  el.className='tl-item';
-  el.innerHTML = `<div class="tl-date">${t.date}</div><div class="tl-role">${t.role}</div><div class="tl-org">${t.org}</div>`;
-  timelineEl.appendChild(el);
+  el.className='tl-row';
+  el.innerHTML = `<div class="tl-date">${t.date}</div><div><div class="tl-role">${t.role}</div><div class="tl-org">${t.org}</div></div>`;
+  tlList.appendChild(el);
 });
 
 /* CERTIFICATIONS */
@@ -345,12 +357,12 @@ const certs = [
   { title:"Programming for Everyone (Python)", issuer:"Coursera", date:"Jan 2021" },
   { title:"Graphic Design", issuer:"Coursera", date:"Jan 2021" },
 ];
-const certGrid = document.getElementById('certGrid');
+const certList = document.getElementById('certList');
 certs.forEach(c=>{
   const el = document.createElement('div');
-  el.className='cert-card';
-  el.innerHTML = `<div class="cert-issuer">${c.issuer}</div><div class="cert-title">${c.title}</div><div class="cert-date">${c.date}</div>`;
-  certGrid.appendChild(el);
+  el.className='plain-row';
+  el.innerHTML = `<div class="plain-main"><div class="t">${c.title}</div><div class="s">${c.issuer}</div></div><div class="plain-date">${c.date}</div>`;
+  certList.appendChild(el);
 });
 
 /* ACHIEVEMENTS */
@@ -372,23 +384,23 @@ const achievements = [
   { title:"Best Outgoing Student Award, Sports Day 2018", org:"Times of India, St. Joseph's School Malakpet", cat:"Other" },
 ];
 const achCats = ["All", ...new Set(achievements.map(a=>a.cat))];
-const achGrid = document.getElementById('achGrid');
 const achFilters = document.getElementById('achFilters');
+const achList = document.getElementById('achList');
 function renderAch(filter){
-  achGrid.innerHTML='';
+  achList.innerHTML='';
   achievements.filter(a=> filter==='All' || a.cat===filter).forEach(a=>{
     const el = document.createElement('div');
-    el.className='ach-card';
+    el.className='ach-row';
     el.innerHTML = `<div class="ach-tag">${a.cat}</div><div class="ach-title">${a.title}</div><div class="ach-org">${a.org}</div>`;
-    achGrid.appendChild(el);
+    achList.appendChild(el);
   });
 }
 achCats.forEach(c=>{
   const btn = document.createElement('button');
-  btn.className='filter-btn'+(c==='All'?' active':'');
+  btn.className='stamp-btn'+(c==='All'?' active':'');
   btn.textContent=c;
   btn.onclick=()=>{
-    document.querySelectorAll('#achFilters .filter-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('#achFilters .stamp-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     renderAch(c);
   };
@@ -396,7 +408,7 @@ achCats.forEach(c=>{
 });
 renderAch('All');
 
-/* EXTRACURRICULAR */
+/* ACTIVITIES */
 const ec = [
   { role:"Volunteer", org:"U&I Trust", date:"Aug 2026 – Present", cat:"Current" },
   { role:"Volunteer", org:"Listeners Army", date:"Jun 2026 – Present", cat:"Current" },
@@ -448,40 +460,40 @@ const ec = [
   { role:"Class Representative — B.Tech. EEE B", org:"AVV Coimbatore", date:"Oct 2020 – Jul 2021", cat:"Amrita" },
 ];
 const ecCats = ["All", ...new Set(ec.map(e=>e.cat))];
-const ecFilters = document.getElementById('ecFilters');
-const ecList = document.getElementById('ecList');
-const ecCount = document.getElementById('ecCount');
+const actFilters = document.getElementById('actFilters');
+const actList = document.getElementById('actList');
+const actCount = document.getElementById('actCount');
 let activeCat = 'All';
-function renderEC(){
-  const query = document.getElementById('ecSearch').value.toLowerCase();
+function renderAct(){
+  const query = document.getElementById('actSearch').value.toLowerCase();
   const filtered = ec.filter(e=>{
     const matchCat = activeCat==='All' || e.cat===activeCat;
     const matchSearch = (e.role+e.org).toLowerCase().includes(query);
     return matchCat && matchSearch;
   });
-  ecCount.textContent = `${filtered.length} of ${ec.length} roles`;
-  ecList.innerHTML='';
+  actCount.textContent = `${filtered.length} of ${ec.length} entries`;
+  actList.innerHTML='';
   filtered.forEach(e=>{
     const el = document.createElement('div');
-    el.className='ec-item';
-    el.innerHTML = `<div><div class="ec-role">${e.role}</div><div class="ec-org">${e.org}</div></div><div class="ec-right"><span class="ec-cat">${e.cat}</span><span class="ec-date">${e.date}</span></div>`;
-    ecList.appendChild(el);
+    el.className='act-row';
+    el.innerHTML = `<div><div class="act-role">${e.role}</div><div class="act-org">${e.org}</div></div><div class="act-right"><span class="act-cat">${e.cat}</span><span class="act-date">${e.date}</span></div>`;
+    actList.appendChild(el);
   });
 }
 ecCats.forEach(c=>{
   const btn = document.createElement('button');
-  btn.className='filter-btn'+(c==='All'?' active':'');
+  btn.className='stamp-btn'+(c==='All'?' active':'');
   btn.textContent=c;
   btn.onclick=()=>{
-    document.querySelectorAll('#ecFilters .filter-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('#actFilters .stamp-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
     activeCat = c;
-    renderEC();
+    renderAct();
   };
-  ecFilters.appendChild(btn);
+  actFilters.appendChild(btn);
 });
-document.getElementById('ecSearch').addEventListener('input', renderEC);
-renderEC();
+document.getElementById('actSearch').addEventListener('input', renderAct);
+renderAct();
 </script>
 
 </body>
