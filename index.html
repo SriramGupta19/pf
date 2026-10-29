@@ -3,311 +3,255 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Field Ledger</title>
+<title>Route Map</title>
 <style>
   :root{
-    --bg:#0e0d0b;
-    --page:#15130f;
-    --page-2:#1b1812;
-    --line:#2a2520;
-    --ink:#c9c2b0;
-    --ink-dim:#817a6c;
-    --stamp:#b97b4a;
-    --serif:'Georgia','Times New Roman',serif;
-    --mono:'Courier New',monospace;
+    --bg:#0a0a0d;
+    --panel:#121216;
+    --panel-2:#17171c;
+    --line:#26262c;
+    --track:#2a2a30;
+    --signal:#9ef01a;
+    --signal-dim:#4f5c1f;
+    --text:#e9e9ec;
+    --muted:#86858f;
+    --sans:'Helvetica Neue',Arial,'Segoe UI',system-ui,-apple-system,sans-serif;
   }
-  *{ margin:0; padding:0; box-sizing:border-box; }
-  html,body{ background:var(--bg); color:var(--ink); font-family:var(--serif); min-height:100vh; }
-  body{
-    display:flex;
-    background-image:
-      radial-gradient(ellipse at top left, rgba(185,123,74,0.04), transparent 50%),
-      radial-gradient(ellipse at bottom right, rgba(185,123,74,0.03), transparent 50%);
+  *{ margin:0; padding:0; box-sizing:border-box; font-family:var(--sans); }
+  body{ background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+  ::selection{ background:var(--signal); color:#000; }
+
+  /* ===== HEADER ===== */
+  header{
+    position:sticky; top:0; z-index:40; background:rgba(10,10,13,0.92); backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line); padding:16px 24px; display:flex; justify-content:space-between; align-items:center;
   }
-  ::selection{ background:var(--stamp); color:#0e0d0b; }
+  .route-id{ font-size:0.68rem; letter-spacing:2px; color:var(--signal); font-weight:700; }
+  .route-name{ font-size:0.92rem; font-weight:700; margin-top:3px; }
+  .status{ font-size:0.65rem; color:var(--muted); display:flex; align-items:center; gap:7px; }
+  .status .dot{ width:6px; height:6px; border-radius:50%; background:var(--signal); box-shadow:0 0 6px var(--signal); animation:pulse 1.8s infinite; }
+  @keyframes pulse{ 50%{ opacity:0.3; } }
 
-  /* ===== SPINE (left index) ===== */
-  .spine{
-    width:210px; flex-shrink:0; background:var(--page);
-    border-right:1px solid var(--line); position:fixed; top:0; left:0; bottom:0;
-    display:flex; flex-direction:column; z-index:20;
+  /* ===== MAP AREA ===== */
+  .map-wrap{ max-width:640px; margin:0 auto; padding:50px 24px 90px; position:relative; }
+  .map-intro{ margin-bottom:46px; }
+  .map-intro h1{ font-size:clamp(1.5rem,5vw,2.1rem); font-weight:800; letter-spacing:-0.5px; line-height:1.25; }
+  .map-intro p{ color:var(--muted); font-size:0.86rem; margin-top:12px; max-width:480px; line-height:1.7; }
+
+  .track-wrap{ position:relative; padding-left:40px; }
+  .track-line{
+    position:absolute; left:11px; top:6px; bottom:6px; width:3px; background:var(--track); border-radius:2px;
   }
-  .spine-head{ padding:28px 22px 18px; border-bottom:1px solid var(--line); }
-  .spine-head .mark{ font-family:var(--mono); font-size:0.62rem; color:var(--stamp); letter-spacing:2px; }
-  .spine-head .title{ font-size:1.05rem; margin-top:8px; letter-spacing:0.3px; }
-  .spine-head .sub{ font-family:var(--mono); font-size:0.6rem; color:var(--ink-dim); margin-top:6px; letter-spacing:0.5px; }
-
-  .spine-list{ flex:1; overflow-y:auto; padding:10px 0; }
-  .spine-item{
-    display:flex; align-items:baseline; gap:10px; padding:11px 22px;
-    cursor:pointer; color:var(--ink-dim); font-size:0.78rem; letter-spacing:0.3px;
-    border-left:2px solid transparent; transition:all .2s;
+  .track-fill{
+    position:absolute; left:11px; top:6px; width:3px; background:var(--signal); border-radius:2px;
+    height:0%; transition:height .5s ease; box-shadow:0 0 10px rgba(158,240,26,0.4);
   }
-  .spine-item .no{ font-family:var(--mono); font-size:0.65rem; color:var(--ink-dim); }
-  .spine-item:hover{ color:var(--ink); background:var(--page-2); }
-  .spine-item.active{ color:var(--ink); border-left-color:var(--stamp); background:var(--page-2); }
-  .spine-item.active .no{ color:var(--stamp); }
 
-  .spine-foot{ padding:16px 22px; border-top:1px solid var(--line); font-family:var(--mono); font-size:0.58rem; color:var(--ink-dim); letter-spacing:0.5px; }
-
-  /* ===== MAIN PAGE AREA ===== */
-  .page-wrap{ margin-left:210px; width:100%; min-height:100vh; position:relative; z-index:1; }
-  .page{
-    max-width:720px; margin:0 auto; padding:60px 36px 90px;
-    display:none; animation:fadein .4s ease;
+  .station{
+    position:relative; display:flex; align-items:center; gap:16px; padding:18px 0; cursor:pointer;
   }
-  .page.active{ display:block; }
-  @keyframes fadein{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:translateY(0); } }
-
-  .entry-head{ margin-bottom:34px; padding-bottom:18px; border-bottom:1px double var(--line); }
-  .entry-no{ font-family:var(--mono); font-size:0.68rem; color:var(--stamp); letter-spacing:2px; }
-  .entry-title{ font-size:1.6rem; margin-top:8px; letter-spacing:0.3px; }
-  .entry-note{ color:var(--ink-dim); font-size:0.85rem; margin-top:10px; line-height:1.7; max-width:560px; font-family:var(--mono); }
-
-  /* ===== OVERVIEW PAGE ===== */
-  .overview-text{ font-size:0.98rem; line-height:1.9; color:var(--ink); max-width:560px; }
-  .overview-text + .overview-text{ margin-top:16px; }
-  .field-table{ margin-top:30px; border-top:1px solid var(--line); }
-  .field-row{ display:flex; justify-content:space-between; gap:20px; padding:12px 0; border-bottom:1px solid var(--line); font-family:var(--mono); font-size:0.78rem; }
-  .field-row .k{ color:var(--ink-dim); letter-spacing:0.5px; }
-  .field-row .v{ color:var(--ink); text-align:right; }
-
-  /* ===== SKILLS ===== */
-  .skill-block{ margin-bottom:26px; }
-  .skill-label{ font-family:var(--mono); font-size:0.68rem; color:var(--stamp); letter-spacing:1.5px; margin-bottom:10px; }
-  .skill-tags{ display:flex; flex-wrap:wrap; gap:8px; }
-  .tag{ font-family:var(--mono); font-size:0.75rem; padding:5px 11px; border:1px solid var(--line); color:var(--ink); border-radius:2px; }
-
-  /* ===== PROJECTS as case files ===== */
-  .case{ border-bottom:1px solid var(--line); padding:16px 0; cursor:pointer; }
-  .case-top{ display:flex; justify-content:space-between; gap:16px; align-items:baseline; }
-  .case-title{ font-size:0.98rem; }
-  .case-date{ font-family:var(--mono); font-size:0.66rem; color:var(--ink-dim); white-space:nowrap; }
-  .case-mark{ font-family:var(--mono); color:var(--stamp); font-size:0.75rem; margin-right:8px; }
-  .case-body{ max-height:0; opacity:0; overflow:hidden; transition:all .3s; font-size:0.85rem; color:var(--ink-dim); line-height:1.7; }
-  .case.open .case-body{ max-height:200px; opacity:1; margin-top:10px; }
-
-  /* ===== TIMELINE ===== */
-  .tl-row{ display:flex; gap:20px; padding:16px 0; border-bottom:1px solid var(--line); }
-  .tl-date{ font-family:var(--mono); font-size:0.68rem; color:var(--stamp); width:140px; flex-shrink:0; padding-top:2px; }
-  .tl-role{ font-size:0.92rem; }
-  .tl-org{ font-size:0.78rem; color:var(--ink-dim); margin-top:3px; font-family:var(--mono); }
-
-  /* ===== CERTS / list style ===== */
-  .plain-list{ display:flex; flex-direction:column; }
-  .plain-row{ display:flex; justify-content:space-between; gap:16px; padding:13px 0; border-bottom:1px solid var(--line); align-items:baseline; }
-  .plain-main .t{ font-size:0.88rem; }
-  .plain-main .s{ font-family:var(--mono); font-size:0.68rem; color:var(--stamp); margin-top:3px; }
-  .plain-date{ font-family:var(--mono); font-size:0.68rem; color:var(--ink-dim); white-space:nowrap; }
-
-  /* ===== ACHIEVEMENTS filterable ===== */
-  .stamp-filter{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:22px; }
-  .stamp-btn{
-    font-family:var(--mono); font-size:0.68rem; padding:6px 12px; border:1px solid var(--line);
-    background:transparent; color:var(--ink-dim); cursor:pointer; transition:all .2s; letter-spacing:0.5px;
+  .station-dot{
+    position:absolute; left:-29px; width:17px; height:17px; border-radius:50%;
+    background:var(--panel); border:3px solid var(--track); z-index:2; transition:all .3s;
+    flex-shrink:0;
   }
-  .stamp-btn:hover{ color:var(--ink); }
-  .stamp-btn.active{ color:var(--stamp); border-color:var(--stamp); }
-  .ach-row{ padding:13px 0; border-bottom:1px solid var(--line); }
-  .ach-tag{ font-family:var(--mono); font-size:0.6rem; color:var(--stamp); letter-spacing:0.8px; }
-  .ach-title{ font-size:0.88rem; margin:6px 0 3px; }
-  .ach-org{ font-family:var(--mono); font-size:0.7rem; color:var(--ink-dim); }
+  .station.visited .station-dot{ border-color:var(--signal); box-shadow:0 0 8px rgba(158,240,26,0.5); }
+  .station.active .station-dot{ background:var(--signal); border-color:var(--signal); }
 
-  /* ===== ACTIVITIES searchable ===== */
-  .search-row{ margin-bottom:18px; }
-  .search-row input{
-    width:100%; max-width:320px; background:var(--page-2); border:1px solid var(--line);
-    color:var(--ink); font-family:var(--mono); font-size:0.78rem; padding:9px 12px;
+  .station-body{ flex:1; display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:var(--panel); border:1px solid var(--line); border-radius:8px; transition:all .25s; }
+  .station:hover .station-body{ border-color:var(--signal); }
+  .station.active .station-body{ border-color:var(--signal); background:var(--panel-2); }
+  .st-code{ font-size:0.62rem; color:var(--signal); letter-spacing:1.5px; font-weight:700; }
+  .st-name{ font-size:0.92rem; font-weight:600; margin-top:3px; }
+  .st-desc{ font-size:0.72rem; color:var(--muted); margin-top:2px; }
+  .st-arrow{ color:var(--muted); font-size:0.9rem; transition:transform .25s; }
+  .station:hover .st-arrow, .station.active .st-arrow{ color:var(--signal); transform:translateX(3px); }
+
+  /* ===== OVERLAY PANEL ===== */
+  .overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:100; opacity:0; pointer-events:none; transition:opacity .25s;
   }
-  .search-row input::placeholder{ color:var(--ink-dim); }
-  .search-row input:focus{ outline:none; border-color:var(--stamp); }
-  .count-note{ font-family:var(--mono); font-size:0.68rem; color:var(--ink-dim); margin-bottom:16px; }
-  .act-row{ display:flex; justify-content:space-between; gap:16px; padding:12px 0; border-bottom:1px solid var(--line); flex-wrap:wrap; }
-  .act-role{ font-size:0.85rem; }
-  .act-org{ font-family:var(--mono); font-size:0.68rem; color:var(--ink-dim); }
-  .act-right{ display:flex; gap:12px; align-items:center; }
-  .act-cat{ font-family:var(--mono); font-size:0.58rem; color:var(--stamp); border:1px solid var(--line); padding:3px 8px; }
-  .act-date{ font-family:var(--mono); font-size:0.65rem; color:var(--ink-dim); white-space:nowrap; }
+  .overlay.show{ opacity:1; pointer-events:auto; }
+  .panel{
+    position:fixed; z-index:101; background:var(--panel); border-left:1px solid var(--line);
+    top:0; right:0; bottom:0; width:min(480px,92vw); transform:translateX(100%);
+    transition:transform .35s ease; display:flex; flex-direction:column;
+  }
+  .panel.show{ transform:translateX(0); }
+  .panel-head{ padding:20px 24px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
+  .panel-head .tag{ font-size:0.65rem; color:var(--signal); letter-spacing:1.5px; font-weight:700; }
+  .panel-head .ttl{ font-size:1.15rem; font-weight:700; margin-top:4px; }
+  .panel-close{ background:var(--panel-2); border:1px solid var(--line); color:var(--text); width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:0.9rem; flex-shrink:0; }
+  .panel-close:hover{ border-color:var(--signal); color:var(--signal); }
+  .panel-body{ padding:22px 24px; overflow-y:auto; flex:1; }
 
-  /* ===== LANGUAGES ===== */
-  .lang-row{ padding:14px 0; }
-  .lang-name{ font-size:0.92rem; }
-  .lang-meta{ font-family:var(--mono); font-size:0.7rem; color:var(--ink-dim); margin-top:6px; }
+  @media(max-width:700px){
+    .panel{ top:auto; left:0; right:0; bottom:0; width:100%; height:85vh; border-left:none; border-top:1px solid var(--line);
+      border-radius:16px 16px 0 0; transform:translateY(100%); }
+    .panel.show{ transform:translateY(0); }
+  }
+
+  /* ===== content blocks reused inside panels ===== */
+  .chip-row{ display:flex; flex-wrap:wrap; gap:7px; margin-bottom:18px; }
+  .chip{ font-size:0.72rem; padding:5px 11px; border:1px solid var(--line); border-radius:14px; color:var(--text); }
+  .block-label{ font-size:0.65rem; color:var(--signal); letter-spacing:1.2px; font-weight:700; margin-bottom:10px; text-transform:uppercase; }
+  .block{ margin-bottom:24px; }
+
+  .case{ border-bottom:1px solid var(--line); padding:14px 0; cursor:pointer; }
+  .case-top{ display:flex; justify-content:space-between; gap:12px; align-items:baseline; }
+  .case-title{ font-size:0.86rem; font-weight:600; }
+  .case-date{ font-size:0.65rem; color:var(--muted); white-space:nowrap; }
+  .case-body{ max-height:0; opacity:0; overflow:hidden; transition:all .3s; font-size:0.8rem; color:var(--muted); line-height:1.6; }
+  .case.open .case-body{ max-height:220px; opacity:1; margin-top:8px; }
+
+  .tl-row{ display:flex; gap:16px; padding:14px 0; border-bottom:1px solid var(--line); }
+  .tl-date{ font-size:0.65rem; color:var(--signal); width:120px; flex-shrink:0; }
+  .tl-role{ font-size:0.86rem; font-weight:600; }
+  .tl-org{ font-size:0.74rem; color:var(--muted); margin-top:3px; }
+
+  .plain-row{ display:flex; justify-content:space-between; gap:14px; padding:12px 0; border-bottom:1px solid var(--line); align-items:baseline; }
+  .plain-main .t{ font-size:0.84rem; }
+  .plain-main .s{ font-size:0.66rem; color:var(--signal); margin-top:3px; }
+  .plain-date{ font-size:0.68rem; color:var(--muted); white-space:nowrap; }
+
+  .filter-row{ display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; }
+  .filter-btn{ font-size:0.68rem; padding:6px 12px; border:1px solid var(--line); border-radius:14px; background:transparent; color:var(--muted); cursor:pointer; }
+  .filter-btn.active{ color:var(--signal); border-color:var(--signal); }
+
+  .ach-row{ padding:12px 0; border-bottom:1px solid var(--line); }
+  .ach-tag{ font-size:0.6rem; color:var(--signal); letter-spacing:0.8px; }
+  .ach-title{ font-size:0.84rem; margin:5px 0 3px; }
+  .ach-org{ font-size:0.7rem; color:var(--muted); }
+
+  .search-input{ width:100%; background:var(--panel-2); border:1px solid var(--line); color:var(--text); padding:9px 12px; border-radius:6px; font-size:0.78rem; margin-bottom:14px; }
+  .search-input:focus{ outline:none; border-color:var(--signal); }
+  .count-note{ font-size:0.68rem; color:var(--muted); margin-bottom:14px; }
+  .act-row{ display:flex; justify-content:space-between; gap:14px; padding:11px 0; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .act-role{ font-size:0.82rem; }
+  .act-org{ font-size:0.68rem; color:var(--muted); }
+  .act-cat{ font-size:0.58rem; color:var(--signal); border:1px solid var(--line); padding:3px 8px; border-radius:10px; }
+  .act-date{ font-size:0.65rem; color:var(--muted); white-space:nowrap; }
+  .act-right{ display:flex; gap:10px; align-items:center; }
+
   .lang-marks{ display:flex; gap:4px; margin-top:10px; }
-  .mark-box{ width:20px; height:6px; background:var(--line); }
-  .mark-box.on{ background:var(--stamp); }
+  .mark-box{ width:20px; height:6px; background:var(--line); border-radius:2px; }
+  .mark-box.on{ background:var(--signal); }
 
-  /* ===== NOTE / CONTACT ===== */
-  .note-box{ font-size:0.9rem; line-height:1.9; color:var(--ink-dim); max-width:520px; }
-  .note-box .signature{ margin-top:30px; font-family:var(--mono); font-size:0.7rem; color:var(--stamp); letter-spacing:1px; }
+  .note-text{ color:var(--muted); font-size:0.86rem; line-height:1.8; }
 
-  footer.ledger-foot{ font-family:var(--mono); font-size:0.6rem; color:var(--ink-dim); padding:30px 36px; border-top:1px solid var(--line); max-width:720px; margin:0 auto; }
-
-  @media(max-width:860px){
-    .spine{ position:static; width:100%; height:auto; border-right:none; border-bottom:1px solid var(--line); flex-direction:row; }
-    .spine-head{ display:none; }
-    .spine-list{ display:flex; overflow-x:auto; padding:8px; }
-    .spine-item{ border-left:none; border-bottom:2px solid transparent; white-space:nowrap; padding:10px 14px; }
-    .spine-item.active{ border-left:none; border-bottom-color:var(--stamp); }
-    .spine-foot{ display:none; }
-    .page-wrap{ margin-left:0; }
-    .tl-row{ flex-direction:column; gap:4px; }
-    .tl-date{ width:auto; }
-  }
+  footer.map-foot{ text-align:center; padding:26px; color:var(--muted); font-size:0.65rem; border-top:1px solid var(--line); }
 </style>
 </head>
 <body>
 
-<div class="spine">
-  <div class="spine-head">
-    <div class="mark">FIELD LEDGER</div>
-    <div class="title">M. Sri Ram Gupta</div>
-    <div class="sub">RECORD MAINTAINED SINCE 2020</div>
+<header>
+  <div>
+    <div class="route-id">LINE 01</div>
+    <div class="route-name">Sri Ram Gupta</div>
   </div>
-  <div class="spine-list" id="spineList">
-    <div class="spine-item active" data-page="overview"><span class="no">01</span> Overview</div>
-    <div class="spine-item" data-page="skills"><span class="no">02</span> Skills</div>
-    <div class="spine-item" data-page="projects"><span class="no">03</span> Projects</div>
-    <div class="spine-item" data-page="experience"><span class="no">04</span> Experience</div>
-    <div class="spine-item" data-page="certs"><span class="no">05</span> Certifications</div>
-    <div class="spine-item" data-page="achievements"><span class="no">06</span> Achievements</div>
-    <div class="spine-item" data-page="activities"><span class="no">07</span> Activities</div>
-    <div class="spine-item" data-page="languages"><span class="no">08</span> Languages</div>
-    <div class="spine-item" data-page="note"><span class="no">09</span> Note</div>
+  <div class="status"><div class="dot"></div> Live record</div>
+</header>
+
+<div class="map-wrap">
+  <div class="map-intro">
+    <h1>A map, not a résumé.</h1>
+    <p>Tap a station to open it. Each one holds a piece of the record — education, work, projects, and the rest — kept separate so nothing piles up at once.</p>
   </div>
-  <div class="spine-foot">PAGE RENDERED LOCALLY<br/>NO EXTERNAL CALLS MADE</div>
+
+  <div class="track-wrap">
+    <div class="track-line"></div>
+    <div class="track-fill" id="trackFill"></div>
+    <div id="stationList"></div>
+  </div>
 </div>
 
-<div class="page-wrap">
+<footer class="map-foot">END OF LINE · <span id="yr"></span></footer>
 
-  <section class="page active" id="page-overview">
-    <div class="entry-head">
-      <div class="entry-no">ENTRY NO. 01</div>
-      <div class="entry-title">Overview</div>
+<div class="overlay" id="overlay"></div>
+<div class="panel" id="panel">
+  <div class="panel-head">
+    <div>
+      <div class="tag" id="panelTag">—</div>
+      <div class="ttl" id="panelTitle">—</div>
     </div>
-    <p class="overview-text">Edison Engineer at GE Vernova, working on Gas Power Engineering and controls platform software.</p>
-    <p class="overview-text">Completed an M.Tech in Industrial Power & Automation at NIT Calicut. Spends time on control systems, multi-robot coordination, and the occasional side project that grows larger than intended.</p>
-    <div class="field-table">
-      <div class="field-row"><div class="k">CURRENT ROLE</div><div class="v">Edison Engineer, GE Vernova</div></div>
-      <div class="field-row"><div class="k">EDUCATION</div><div class="v">M.Tech — NIT Calicut</div></div>
-      <div class="field-row"><div class="k">FOUNDATION</div><div class="v">B.Tech — Amrita Vishwa Vidyapeetham</div></div>
-      <div class="field-row"><div class="k">FOCUS AREAS</div><div class="v">Controls · Robotics · Power Systems</div></div>
-    </div>
-  </section>
-
-  <section class="page" id="page-skills">
-    <div class="entry-head">
-      <div class="entry-no">ENTRY NO. 02</div>
-      <div class="entry-title">Skills</div>
-      <div class="entry-note">Working knowledge, listed plainly.</div>
-    </div>
-    <div class="skill-block">
-      <div class="skill-label">LANGUAGES</div>
-      <div class="skill-tags"><div class="tag">C</div><div class="tag">C#</div><div class="tag">Python</div></div>
-    </div>
-    <div class="skill-block">
-      <div class="skill-label">TOOLS</div>
-      <div class="skill-tags"><div class="tag">MATLAB</div><div class="tag">LabVIEW</div><div class="tag">ROS2</div><div class="tag">Gazebo</div></div>
-    </div>
-    <div class="skill-block">
-      <div class="skill-label">PLATFORMS</div>
-      <div class="skill-tags"><div class="tag">Arduino</div><div class="tag">Raspberry Pi</div><div class="tag">Pico</div><div class="tag">ESP8266</div><div class="tag">ESP32</div><div class="tag">Ubuntu</div></div>
-    </div>
-    <div class="skill-block">
-      <div class="skill-label">PROGRAMS</div>
-      <div class="skill-tags"><div class="tag">NVIDIA Developer</div><div class="tag">Arm Developer</div></div>
-    </div>
-  </section>
-
-  <section class="page" id="page-projects">
-    <div class="entry-head">
-      <div class="entry-no">ENTRY NO. 03</div>
-      <div class="entry-title">Projects</div>
-      <div class="entry-note">Open a case file for notes.</div>
-    </div>
-    <div id="caseList"></div>
-  </section>
-
-  <section class="page" id="page-experience">
-    <div class="entry-head">
-      <div class="entry-no">ENTRY NO. 04</div>
-      <div class="entry-title">Experience & Education</div>
-    </div>
-    <div id="tlList"></div>
-  </section>
-
-  <section class="page" id="page-certs">
-    <div class="entry-head">
-      <div class="entry-no">ENTRY NO. 05</div>
-      <div class="entry-title">Certifications</div>
-    </div>
-    <div class="plain-list" id="certList"></div>
-  </section>
-
-  <section class="page" id="page-achievements">
-    <div class="entry-head">
-      <div class="entry-no">ENTRY NO. 06</div>
-      <div class="entry-title">Achievements</div>
-      <div class="entry-note">Filed by category, not by importance.</div>
-    </div>
-    <div class="stamp-filter" id="achFilters"></div>
-    <div id="achList"></div>
-  </section>
-
-  <section class="page" id="page-activities">
-    <div class="entry-head">
-      <div class="entry-no">ENTRY NO. 07</div>
-      <div class="entry-title">Activities</div>
-      <div class="entry-note">Roles across institutes and chapters over the years.</div>
-    </div>
-    <div class="search-row"><input type="text" id="actSearch" placeholder="search entries..." /></div>
-    <div class="stamp-filter" id="actFilters"></div>
-    <div class="count-note" id="actCount"></div>
-    <div id="actList"></div>
-  </section>
-
-  <section class="page" id="page-languages">
-    <div class="entry-head">
-      <div class="entry-no">ENTRY NO. 08</div>
-      <div class="entry-title">Languages</div>
-    </div>
-    <div class="lang-row">
-      <div class="lang-name">German — Level 3, Advanced</div>
-      <div class="lang-meta">Vivekananda Institute of Languages, Ramakrishna Math, Hyderabad · Jun 2024 – Apr 2025</div>
-      <div class="lang-meta">Grades: Level 1 — A+ · Level 2 — A+ · Level 3 — A+</div>
-      <div class="lang-marks"><div class="mark-box on"></div><div class="mark-box on"></div><div class="mark-box on"></div></div>
-    </div>
-  </section>
-
-  <section class="page" id="page-note">
-    <div class="entry-head">
-      <div class="entry-no">ENTRY NO. 09</div>
-      <div class="entry-title">Note</div>
-    </div>
-    <p class="note-box">This ledger is kept as a record, not a pitch. If you'd like to get in touch, add your preferred contact method where it makes sense for you — this page intentionally leaves no personal details on display.</p>
-    <div class="signature">— END OF RECORD —</div>
-  </section>
-
-  <footer class="ledger-foot">LAST ENTRY FILED <span id="yr"></span> · KEPT PLAIN, ON PURPOSE</footer>
+    <button class="panel-close" id="panelClose">✕</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
 </div>
 
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
-/* Page switching */
-const spineItems = document.querySelectorAll('.spine-item');
-const pages = document.querySelectorAll('.page');
-spineItems.forEach(item=>{
-  item.addEventListener('click', ()=>{
-    spineItems.forEach(i=>i.classList.remove('active'));
-    item.classList.add('active');
-    const target = item.getAttribute('data-page');
-    pages.forEach(p=> p.classList.toggle('active', p.id === 'page-'+target));
-    window.scrollTo({top:0, behavior:'smooth'});
-  });
+const stations = [
+  { code:"ST-01", name:"Overview", desc:"Who, what, where" },
+  { code:"ST-02", name:"Skills", desc:"Languages, tools, platforms" },
+  { code:"ST-03", name:"Projects", desc:"Case files, open to read" },
+  { code:"ST-04", name:"Experience", desc:"Work and education, in order" },
+  { code:"ST-05", name:"Certifications", desc:"Short course records" },
+  { code:"ST-06", name:"Achievements", desc:"Filed by category" },
+  { code:"ST-07", name:"Activities", desc:"Searchable roles log" },
+  { code:"ST-08", name:"Languages", desc:"Spoken, not programming" },
+  { code:"ST-09", name:"Note", desc:"How to reach out" },
+];
+
+const stationList = document.getElementById('stationList');
+const trackFill = document.getElementById('trackFill');
+let visited = new Set();
+
+stations.forEach((s,i)=>{
+  const el = document.createElement('div');
+  el.className = 'station';
+  el.dataset.index = i;
+  el.innerHTML = `
+    <div class="station-dot"></div>
+    <div class="station-body">
+      <div>
+        <div class="st-code">${s.code}</div>
+        <div class="st-name">${s.name}</div>
+        <div class="st-desc">${s.desc}</div>
+      </div>
+      <div class="st-arrow">→</div>
+    </div>
+  `;
+  el.addEventListener('click', ()=> openStation(i));
+  stationList.appendChild(el);
 });
 
-/* PROJECTS as case files */
+function updateTrack(){
+  const pct = visited.size===0 ? 0 : (Math.max(...visited)+1)/stations.length*100;
+  trackFill.style.height = pct+'%';
+  document.querySelectorAll('.station').forEach((el,i)=>{
+    el.classList.toggle('visited', visited.has(i));
+  });
+}
+
+const overlay = document.getElementById('overlay');
+const panel = document.getElementById('panel');
+const panelTag = document.getElementById('panelTag');
+const panelTitle = document.getElementById('panelTitle');
+const panelBody = document.getElementById('panelBody');
+
+function openStation(i){
+  visited.add(i);
+  updateTrack();
+  document.querySelectorAll('.station').forEach((el,idx)=> el.classList.toggle('active', idx===i));
+  const s = stations[i];
+  panelTag.textContent = s.code;
+  panelTitle.textContent = s.name;
+  panelBody.innerHTML = '';
+  renderContent(i, panelBody);
+  overlay.classList.add('show');
+  panel.classList.add('show');
+}
+function closePanel(){
+  overlay.classList.remove('show');
+  panel.classList.remove('show');
+  document.querySelectorAll('.station').forEach(el=> el.classList.remove('active'));
+}
+document.getElementById('panelClose').addEventListener('click', closePanel);
+overlay.addEventListener('click', closePanel);
+
+/* ===== DATA ===== */
 const projects = [
   { title:"Adaptive Heterogeneous Multi-Robot Coordination and Control", date:"Jan 2025 – Jun 2026", desc:"M.Tech major project — leader-follower coordination strategy for two heterogeneous mobile robots, handling system uncertainties in multi-robot missions." },
   { title:"AI-Enabled Safety Interlock System for Two-Wheelers", date:"Jan 2026 – Feb 2026", desc:"Qualcomm & Arduino 'AI for All' challenge entry — CV-based helmet detection on Arduino UNO Q, blocking ignition if a rider isn't wearing a helmet." },
@@ -320,16 +264,6 @@ const projects = [
   { title:"Color Sense Bot", date:"Apr 2023 – May 2023", desc:"3-wheel robot using PIC16F877A and TCS3200 sensor, responding to color cards." },
   { title:"Live-in-Labs: Infrastructure at Dalapur, UP", date:"Feb 2023 – Aug 2023", desc:"Rural development initiative using Participatory Rural Appraisal (PRA) tools." },
 ];
-const caseList = document.getElementById('caseList');
-projects.forEach(p=>{
-  const el = document.createElement('div');
-  el.className='case';
-  el.innerHTML = `<div class="case-top"><div class="case-title"><span class="case-mark">+</span>${p.title}</div><div class="case-date">${p.date}</div></div><div class="case-body">${p.desc}</div>`;
-  el.addEventListener('click', ()=> el.classList.toggle('open'));
-  caseList.appendChild(el);
-});
-
-/* TIMELINE */
 const timelineData = [
   { date:"Jul 2026 – Present", role:"Edison Engineer — Gas Power Engineering", org:"GE Vernova, HTC, India" },
   { date:"2024 – 2026", role:"M.Tech, Industrial Power & Automation", org:"NIT Calicut · CGPA 9.88/10 · Gold Medalist" },
@@ -337,15 +271,6 @@ const timelineData = [
   { date:"Jun 2020", role:"Higher Secondary Certificate", org:"FIITJEE Junior College, Hyderabad · 91.4%" },
   { date:"May 2018", role:"Secondary School Certificate", org:"St. Joseph's School, Hyderabad · 87%" },
 ];
-const tlList = document.getElementById('tlList');
-timelineData.forEach(t=>{
-  const el = document.createElement('div');
-  el.className='tl-row';
-  el.innerHTML = `<div class="tl-date">${t.date}</div><div><div class="tl-role">${t.role}</div><div class="tl-org">${t.org}</div></div>`;
-  tlList.appendChild(el);
-});
-
-/* CERTIFICATIONS */
 const certs = [
   { title:"Developing IoT Applications", issuer:"Cisco", date:"Sep 2024" },
   { title:"Wireless Technologies for IoT", issuer:"Cisco", date:"May 2024" },
@@ -357,15 +282,6 @@ const certs = [
   { title:"Programming for Everyone (Python)", issuer:"Coursera", date:"Jan 2021" },
   { title:"Graphic Design", issuer:"Coursera", date:"Jan 2021" },
 ];
-const certList = document.getElementById('certList');
-certs.forEach(c=>{
-  const el = document.createElement('div');
-  el.className='plain-row';
-  el.innerHTML = `<div class="plain-main"><div class="t">${c.title}</div><div class="s">${c.issuer}</div></div><div class="plain-date">${c.date}</div>`;
-  certList.appendChild(el);
-});
-
-/* ACHIEVEMENTS */
 const achievements = [
   { title:"Gold Medalist — M.Tech. in IPA (2024-26)", org:"National Institute of Technology Calicut", cat:"Academic" },
   { title:"Finalist (2nd) — AI for All: Physical AI Edition, India AI Summit 2026", org:"Qualcomm & Arduino", cat:"Innovation" },
@@ -383,32 +299,6 @@ const achievements = [
   { title:"2nd Prize — Poster Design Contest, Amritotsavam 2022", org:"Amrita Vishwa Vidyapeetham", cat:"Design" },
   { title:"Best Outgoing Student Award, Sports Day 2018", org:"Times of India, St. Joseph's School Malakpet", cat:"Other" },
 ];
-const achCats = ["All", ...new Set(achievements.map(a=>a.cat))];
-const achFilters = document.getElementById('achFilters');
-const achList = document.getElementById('achList');
-function renderAch(filter){
-  achList.innerHTML='';
-  achievements.filter(a=> filter==='All' || a.cat===filter).forEach(a=>{
-    const el = document.createElement('div');
-    el.className='ach-row';
-    el.innerHTML = `<div class="ach-tag">${a.cat}</div><div class="ach-title">${a.title}</div><div class="ach-org">${a.org}</div>`;
-    achList.appendChild(el);
-  });
-}
-achCats.forEach(c=>{
-  const btn = document.createElement('button');
-  btn.className='stamp-btn'+(c==='All'?' active':'');
-  btn.textContent=c;
-  btn.onclick=()=>{
-    document.querySelectorAll('#achFilters .stamp-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    renderAch(c);
-  };
-  achFilters.appendChild(btn);
-});
-renderAch('All');
-
-/* ACTIVITIES */
 const ec = [
   { role:"Volunteer", org:"U&I Trust", date:"Aug 2026 – Present", cat:"Current" },
   { role:"Volunteer", org:"Listeners Army", date:"Jun 2026 – Present", cat:"Current" },
@@ -459,41 +349,134 @@ const ec = [
   { role:"Content Writer", org:"Brainly", date:"Mar – Jun 2021", cat:"Other" },
   { role:"Class Representative — B.Tech. EEE B", org:"AVV Coimbatore", date:"Oct 2020 – Jul 2021", cat:"Amrita" },
 ];
-const ecCats = ["All", ...new Set(ec.map(e=>e.cat))];
-const actFilters = document.getElementById('actFilters');
-const actList = document.getElementById('actList');
-const actCount = document.getElementById('actCount');
-let activeCat = 'All';
-function renderAct(){
-  const query = document.getElementById('actSearch').value.toLowerCase();
-  const filtered = ec.filter(e=>{
-    const matchCat = activeCat==='All' || e.cat===activeCat;
-    const matchSearch = (e.role+e.org).toLowerCase().includes(query);
-    return matchCat && matchSearch;
-  });
-  actCount.textContent = `${filtered.length} of ${ec.length} entries`;
-  actList.innerHTML='';
-  filtered.forEach(e=>{
-    const el = document.createElement('div');
-    el.className='act-row';
-    el.innerHTML = `<div><div class="act-role">${e.role}</div><div class="act-org">${e.org}</div></div><div class="act-right"><span class="act-cat">${e.cat}</span><span class="act-date">${e.date}</span></div>`;
-    actList.appendChild(el);
-  });
+
+function renderContent(i, container){
+  if(i===0){
+    container.innerHTML = `
+      <p class="note-text">Edison Engineer at GE Vernova, working on Gas Power Engineering and controls platform software. Completed an M.Tech in Industrial Power & Automation at NIT Calicut.</p>
+      <div class="block" style="margin-top:20px;">
+        <div class="plain-row"><div class="plain-main"><div class="t">Current role</div></div><div class="plain-date">Edison Engineer, GE Vernova</div></div>
+        <div class="plain-row"><div class="plain-main"><div class="t">Education</div></div><div class="plain-date">M.Tech — NIT Calicut</div></div>
+        <div class="plain-row"><div class="plain-main"><div class="t">Foundation</div></div><div class="plain-date">B.Tech — Amrita</div></div>
+        <div class="plain-row"><div class="plain-main"><div class="t">Focus</div></div><div class="plain-date">Controls · Robotics · Power</div></div>
+      </div>`;
+  }
+  else if(i===1){
+    container.innerHTML = `
+      <div class="block"><div class="block-label">Languages</div><div class="chip-row"><div class="chip">C</div><div class="chip">C#</div><div class="chip">Python</div></div></div>
+      <div class="block"><div class="block-label">Tools</div><div class="chip-row"><div class="chip">MATLAB</div><div class="chip">LabVIEW</div><div class="chip">ROS2</div><div class="chip">Gazebo</div></div></div>
+      <div class="block"><div class="block-label">Platforms</div><div class="chip-row"><div class="chip">Arduino</div><div class="chip">Raspberry Pi</div><div class="chip">Pico</div><div class="chip">ESP8266</div><div class="chip">ESP32</div><div class="chip">Ubuntu</div></div></div>
+      <div class="block"><div class="block-label">Programs</div><div class="chip-row"><div class="chip">NVIDIA Developer</div><div class="chip">Arm Developer</div></div></div>`;
+  }
+  else if(i===2){
+    projects.forEach(p=>{
+      const el = document.createElement('div');
+      el.className='case';
+      el.innerHTML = `<div class="case-top"><div class="case-title">${p.title}</div><div class="case-date">${p.date}</div></div><div class="case-body">${p.desc}</div>`;
+      el.addEventListener('click', ()=> el.classList.toggle('open'));
+      container.appendChild(el);
+    });
+  }
+  else if(i===3){
+    timelineData.forEach(t=>{
+      const el = document.createElement('div');
+      el.className='tl-row';
+      el.innerHTML = `<div class="tl-date">${t.date}</div><div><div class="tl-role">${t.role}</div><div class="tl-org">${t.org}</div></div>`;
+      container.appendChild(el);
+    });
+  }
+  else if(i===4){
+    certs.forEach(c=>{
+      const el = document.createElement('div');
+      el.className='plain-row';
+      el.innerHTML = `<div class="plain-main"><div class="t">${c.title}</div><div class="s">${c.issuer}</div></div><div class="plain-date">${c.date}</div>`;
+      container.appendChild(el);
+    });
+  }
+  else if(i===5){
+    const filterRow = document.createElement('div');
+    filterRow.className='filter-row';
+    const listDiv = document.createElement('div');
+    container.appendChild(filterRow);
+    container.appendChild(listDiv);
+    const cats = ["All", ...new Set(achievements.map(a=>a.cat))];
+    function render(filter){
+      listDiv.innerHTML='';
+      achievements.filter(a=> filter==='All' || a.cat===filter).forEach(a=>{
+        const el = document.createElement('div');
+        el.className='ach-row';
+        el.innerHTML = `<div class="ach-tag">${a.cat}</div><div class="ach-title">${a.title}</div><div class="ach-org">${a.org}</div>`;
+        listDiv.appendChild(el);
+      });
+    }
+    cats.forEach(c=>{
+      const btn = document.createElement('button');
+      btn.className='filter-btn'+(c==='All'?' active':'');
+      btn.textContent=c;
+      btn.onclick=()=>{
+        filterRow.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        render(c);
+      };
+      filterRow.appendChild(btn);
+    });
+    render('All');
+  }
+  else if(i===6){
+    const searchInput = document.createElement('input');
+    searchInput.type='text'; searchInput.className='search-input'; searchInput.placeholder='Search roles, organizations...';
+    const filterRow = document.createElement('div'); filterRow.className='filter-row';
+    const countNote = document.createElement('div'); countNote.className='count-note';
+    const listDiv = document.createElement('div');
+    container.appendChild(searchInput);
+    container.appendChild(filterRow);
+    container.appendChild(countNote);
+    container.appendChild(listDiv);
+    const cats = ["All", ...new Set(ec.map(e=>e.cat))];
+    let activeCat='All';
+    function render(){
+      const q = searchInput.value.toLowerCase();
+      const filtered = ec.filter(e=>{
+        const matchCat = activeCat==='All' || e.cat===activeCat;
+        const matchSearch = (e.role+e.org).toLowerCase().includes(q);
+        return matchCat && matchSearch;
+      });
+      countNote.textContent = `${filtered.length} of ${ec.length} entries`;
+      listDiv.innerHTML='';
+      filtered.forEach(e=>{
+        const el = document.createElement('div');
+        el.className='act-row';
+        el.innerHTML = `<div><div class="act-role">${e.role}</div><div class="act-org">${e.org}</div></div><div class="act-right"><span class="act-cat">${e.cat}</span><span class="act-date">${e.date}</span></div>`;
+        listDiv.appendChild(el);
+      });
+    }
+    cats.forEach(c=>{
+      const btn = document.createElement('button');
+      btn.className='filter-btn'+(c==='All'?' active':'');
+      btn.textContent=c;
+      btn.onclick=()=>{
+        filterRow.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCat=c;
+        render();
+      };
+      filterRow.appendChild(btn);
+    });
+    searchInput.addEventListener('input', render);
+    render();
+  }
+  else if(i===7){
+    container.innerHTML = `
+      <div style="font-size:0.9rem; font-weight:600;">German — Level 3, Advanced</div>
+      <div style="font-size:0.74rem; color:var(--muted); margin-top:6px;">Vivekananda Institute of Languages, Ramakrishna Math, Hyderabad · Jun 2024 – Apr 2025</div>
+      <div style="font-size:0.74rem; color:var(--muted); margin-top:4px;">Grades: Level 1 — A+ · Level 2 — A+ · Level 3 — A+</div>
+      <div class="lang-marks"><div class="mark-box on"></div><div class="mark-box on"></div><div class="mark-box on"></div></div>`;
+  }
+  else if(i===8){
+    container.innerHTML = `
+      <p class="note-text">This map is kept as a record, not a pitch. If you'd like to get in touch, add your preferred contact method where it suits you — this page intentionally leaves no personal details on display.</p>`;
+  }
 }
-ecCats.forEach(c=>{
-  const btn = document.createElement('button');
-  btn.className='stamp-btn'+(c==='All'?' active':'');
-  btn.textContent=c;
-  btn.onclick=()=>{
-    document.querySelectorAll('#actFilters .stamp-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    activeCat = c;
-    renderAct();
-  };
-  actFilters.appendChild(btn);
-});
-document.getElementById('actSearch').addEventListener('input', renderAct);
-renderAct();
 </script>
 
 </body>
