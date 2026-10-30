@@ -63,7 +63,7 @@
   /* ===== MAIN ===== */
   main{ padding:0 clamp(22px,5vw,64px); max-width:880px; width:100%; }
 
-  .hero{ position:relative; padding:110px 0 10px; isolation:isolate; }
+  .hero{ position:relative; padding:110px 0 30px; isolation:isolate; }
   .blob{
     position:absolute; z-index:-1; width:360px; height:360px; border-radius:50%; filter:blur(60px);
     background:radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
@@ -74,7 +74,7 @@
   .greet span{ display:inline-block; transition:opacity .25s, transform .25s; }
   .greet span.out{ opacity:0; transform:translateY(6px); }
   .hero h1{ font-size:clamp(2.5rem,7vw,4rem); font-weight:700; letter-spacing:-.035em; line-height:1.05; margin-top:6px; }
-  .hero-tagline { margin-top: 16px; font-size: 1rem; color: var(--muted); line-height: 1.6; max-width: 50ch; }
+  .hero-tagline { margin-top: 19px; font-size: 1rem; color: var(--muted); line-height: 1.6; max-width: 50ch; }
   .hint{ margin-top:22px; font-size:.82rem; color:var(--muted); display:flex; align-items:center; gap:8px; }
   .hint svg{ width:14px; height:14px; animation:bob 1.8s ease-in-out infinite; }
   @keyframes bob{ 50%{ transform:translateY(4px); } }
